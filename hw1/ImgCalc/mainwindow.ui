@@ -1,0 +1,518 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>753</width>
+    <height>380</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>650</width>
+    <height>350</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout_5">
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <widget class="QWidget" name="tab1">
+       <attribute name="title">
+        <string>Calc</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0">
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="1">
+           <widget class="QLabel" name="ImgLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>300</width>
+              <height>300</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <layout class="QHBoxLayout" name="histogram"/>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0">
+         <layout class="QHBoxLayout" name="CalcInterface">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetDefaultConstraint</enum>
+          </property>
+          <item>
+           <layout class="QHBoxLayout" name="addSubPanel">
+            <item>
+             <widget class="QPushButton" name="add">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>➕</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="substract">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>➖</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="shiftValue">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="maximum">
+               <number>32</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="HSpacer1">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Expanding</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>5</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="mutiplyPanel">
+            <item>
+             <widget class="QPushButton" name="multiply">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>✖</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="ratioValue">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="maximum">
+               <double>10.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.500000000000000</double>
+              </property>
+              <property name="value">
+               <double>1.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="HSpacer2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>5</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="reset">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Reset</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="HSpacer3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>60</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab2">
+       <attribute name="title">
+        <string>Merge</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <layout class="QGridLayout" name="MergeInterface">
+          <item row="4" column="5">
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QPushButton" name="average">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Average</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="getG">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Get g(x, y)</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="0" column="3" rowspan="4">
+           <widget class="QFrame" name="frame2">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_5">
+             <item row="0" column="0">
+              <widget class="QLabel" name="RightImgLabel">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>200</width>
+                 <height>200</height>
+                </size>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="0" column="1" rowspan="4">
+           <widget class="QFrame" name="frame">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_3">
+             <item row="0" column="0">
+              <widget class="QLabel" name="LeftImgLabel">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>200</width>
+                 <height>200</height>
+                </size>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="0" column="5" rowspan="4">
+           <widget class="QFrame" name="frame3">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_6">
+             <item row="0" column="0">
+              <widget class="QLabel" name="ResultImgLabel">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>200</width>
+                 <height>200</height>
+                </size>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="label">
+            <property name="minimumSize">
+             <size>
+              <width>25</width>
+              <height>80</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>20</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>➕</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QLabel" name="label_2">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>25</width>
+              <height>80</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>20</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>＝</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>753</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionOpen"/>
+    <addaction name="actionSave"/>
+    <addaction name="separator"/>
+    <addaction name="actionLImg"/>
+    <addaction name="actionRImg"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <addaction name="menuFile"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionLImg">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Open Left Image</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="actionRImg">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Open Right Image</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Save Image</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
