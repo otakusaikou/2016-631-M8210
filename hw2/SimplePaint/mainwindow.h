@@ -34,7 +34,6 @@ public:
     cv::Mat imgSrc;         // Source image
     cv::Mat bufRGB;         // Buffer for color image
     cv::Mat bufGray;        // Buffer for operation involved grayscale image
-    cv::Mat bufSave;        // Buffer for saving image
     cv::Mat *curImg;        // Pointer to the current image on the display
     cv::Mat bufResize;
     double alpha;           // Contrast parameter

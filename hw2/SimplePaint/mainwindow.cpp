@@ -220,6 +220,7 @@ void MainWindow::on_actionSave_triggered()
         }
 
         // Copy the result to the image save buffer
+        Mat bufSave;
         (*curImg).copyTo(bufSave);
 
         // If current image is color image, convert it from rgb to bgr
@@ -249,7 +250,6 @@ void MainWindow::on_actionReset_triggered()
     // Release memory
     bufRGB.release();
     bufGray.release();
-    bufSave.release();
     bufResize.release();
 
     // Copy the source image data to color image buffer
