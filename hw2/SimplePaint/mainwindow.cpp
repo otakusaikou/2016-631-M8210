@@ -398,35 +398,79 @@ void MainWindow::on_resizeButton_clicked()
 }
 
 //
+// Perform histogram equalization
+//
+void MainWindow::on_actionHistogram_Equalization_triggered()
+{
+    vector<int> hist(256 * (*curImg).channels(), 0);        // Histogram
+    vector<int> cumHist(256 * (*curImg).channels(), 0);     // Cumulative histogram
+    vector<double> cumPdf(256 * (*curImg).channels(), 0);   // Cumulative distribution function
+    vector<int> lut(256 * (*curImg).channels(), 0);         // Look up table for histogram equalization
+    double scale = 255.0 / ((*curImg).rows * (*curImg).cols);
+
+    // Calculate the histogram
+    for (int i = 0; i < (*curImg).rows; ++i) {
+        for (int j = 0; j < (*curImg).cols; ++j) {
+            for (int k = 0; k < (*curImg).channels(); ++k) {
+                ++hist.at(256 * k + (*curImg).data[(*curImg).channels() * ((*curImg).cols * i + j) + k]);
+            }
+        }
+    }
+
+    // Calculate the cumulative histogram
+    for (int k = 0; k < (*curImg).channels(); ++k) {
+        for (int i = 0; i < 256; ++i) {
+            if (i == 0) {
+                cumHist.at(256 * k + i) = hist.at(256 * k + i);
+            } else {
+                cumHist.at(256 * k + i) = hist.at(256 * k + i) + cumHist.at(256 * k + i - 1);
+            }
+        }
+    }
+
+    // Generate the look up table
+    for (int k = 0; k < (*curImg).channels(); ++k) {
+        for (int i = 0; i < 256; ++i) {
+            lut.at(256 * k + i) = cvRound(cumHist.at(256 * k + i) * scale);
+        }
+    }
+
+
+    // Equalize the image
+    for (int i = 0; i < (*curImg).rows; ++i) {
+        for (int j = 0; j < (*curImg).cols; ++j) {
+            for (int k = 0; k < (*curImg).channels(); ++k) {
+                (*curImg).data[(*curImg).channels() * ((*curImg).cols * i + j) + k] =
+                    lut.at(256 * k + (*curImg).data[(*curImg).channels() * ((*curImg).cols * i + j) + k]);
+            }
+        }
+    }
+
+    // Update the image label and histogram chart
+    updateFigures();
+}
+
+//
 // Update the image label and histogram chart
 //
 void MainWindow::updateFigures() {
     QImage QImg;
-    vector<int> hist;   // Histogram for color or grayscale image (256 gray scales)
+    vector<int> hist(256 * (*curImg).channels(), 0);        // Histogram
+
+    // Conver opencv image matrix to QImage object
     if ((*curImg).channels() == 1) {        // For grayscale image
-        // For image
         QImg = QImage((const unsigned char*) ((*curImg).data),
                             (*curImg).cols, (*curImg).rows, (*curImg).step1(), QImage::Format_Grayscale8);
-
-        // For histogram
-        hist.resize(256);
-        for (int i = 0; i < (*curImg).rows; ++i) {
-            for (int j = 0; j < (*curImg).cols; ++j) {
-                ++hist.at((*curImg).data[(*curImg).channels() * ((*curImg).cols * i + j)]);
-            }
-        }
     } else {                                // For color image
-        // For image
         QImg = QImage((const unsigned char*) ((*curImg).data),
                             (*curImg).cols, (*curImg).rows, (*curImg).step1(), QImage::Format_RGB888);
+    }
 
-        // For histogram
-        hist.resize(768);
-        for (int i = 0; i < (*curImg).rows; ++i) {
-            for (int j = 0; j < (*curImg).cols; ++j) {
-                for (int k = 0; k < (*curImg).channels(); ++k) {
-                    ++hist.at(256 * k + (*curImg).data[(*curImg).channels() * ((*curImg).cols * i + j) + k]);
-                }
+    // Calculate histogram
+    for (int i = 0; i < (*curImg).rows; ++i) {
+        for (int j = 0; j < (*curImg).cols; ++j) {
+            for (int k = 0; k < (*curImg).channels(); ++k) {
+                ++hist.at(256 * k + (*curImg).data[(*curImg).channels() * ((*curImg).cols * i + j) + k]);
             }
         }
     }
@@ -507,13 +551,13 @@ void MainWindow::resize(const Mat &imgSrc, Mat &imgDst) {
                 x = j * scaleX;
                 y = i * scaleY;
                 // Get coordinates of nearest four points
-                x0 = floor(x);
+                x0 = cvFloor(x);
                 if (x0 > (imgSrc.cols - 1)) x0 = (imgSrc.cols - 1);
 
                 x1 = x0 + 1;
                 if (x1 >= (imgSrc.cols - 1)) x1 = (imgSrc.cols - 1);
 
-                y0 = floor(y);
+                y0 = cvFloor(y);
                 if (y0 >= (imgSrc.rows - 1)) y0 = (imgSrc.rows - 1);
 
                 y1 = y0 + 1;
