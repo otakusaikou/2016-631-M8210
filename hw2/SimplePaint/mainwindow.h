@@ -15,6 +15,7 @@
 #include <QtCharts/QBarCategoryAxis>
 #include <opencv2/opencv.hpp>
 #include <vector>
+#include <cmath>
 
 namespace Ui {
 class MainWindow;
@@ -62,6 +63,8 @@ private slots:
     void on_brightnessSlider_sliderReleased();
 
     void on_resizeButton_clicked();
+
+    void on_changeButton_clicked();
 
     void on_actionHistogram_Equalization_triggered();
 

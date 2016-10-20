@@ -21,6 +21,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->brightnessSlider->setDisabled(true);
     ui->resizeButton->setDisabled(true);                    // Resize
     ui->resizeSpinBox->setDisabled(true);
+    ui->grayscaleComboBox->setDisabled(true);               // Grayscale modification
+    ui->changeButton->setDisabled(true);
     ui->actionHistogram_Equalization->setDisabled(true);    // Histogram equalization
 }
 
@@ -86,6 +88,10 @@ void MainWindow::on_actionOpen_triggered()
     // Enable the resize function
     ui->resizeButton->setDisabled(false);
     ui->resizeSpinBox->setDisabled(false);
+
+    // Enable the grayscale modification function
+    ui->grayscaleComboBox->setDisabled(false);
+    ui->changeButton->setDisabled(false);
 
     // Enable histogram equalization
     ui->actionHistogram_Equalization->setDisabled(false);
@@ -268,12 +274,15 @@ void MainWindow::on_actionReset_triggered()
     // Disable thresholding function
     ui->actionThreshold->setDisabled(true);
 
-    // Reset the slider, alpha, beta values and spinbox value
+    // Reset the slider, alpha, beta values
     ui->contrastSlider->setValue(50);
     ui->brightnessSlider->setValue(50);
-    ui->resizeSpinBox->setValue(1.0);
     alpha = 1.0;
     beta = 0.0;
+
+    // Reset the spinbox and combobox values
+    ui->resizeSpinBox->setValue(1.0);
+    ui->grayscaleComboBox->setCurrentIndex(0);
 }
 
 //
@@ -338,7 +347,6 @@ void MainWindow::on_contrastSlider_sliderReleased()
                             ((*curImg).data[(*curImg).channels() * ((*curImg).cols * i + j) + k]));
             }
         }
-
     }
 
     // Update the image label and histogram chart
@@ -369,7 +377,6 @@ void MainWindow::on_brightnessSlider_sliderReleased()
                             beta + (255.0 / 100) * ui->brightnessSlider->value() - 127.5);
             }
         }
-
     }
 
     // Update the image label and histogram chart
@@ -398,13 +405,36 @@ void MainWindow::on_resizeButton_clicked()
 }
 
 //
+// Change the grayscale level
+//
+void MainWindow::on_changeButton_clicked()
+{
+    int scale = pow(2, ui->grayscaleComboBox->count() - (ui->grayscaleComboBox->currentIndex()));
+
+    // The new_image = floor(old_image * scale / 256) * (255 / (scale - 1))
+    for(int i = 0; i < (*curImg).rows; ++i) {
+        for(int j = 0; j < (*curImg).cols; ++j) {
+            for(int k = 0; k < (*curImg).channels(); ++k) {
+                // Assign the new value to the image buffer on the display
+                (*curImg).data[(*curImg).channels() * ((*curImg).cols * i + j) + k] =
+                         saturate_cast<uchar>(
+                            floor((1.0 * scale / 256) * ((*curImg).data[(*curImg).channels() * ((*curImg).cols * i + j) + k])) *
+                            (255 / (scale - 1)));
+            }
+        }
+    }
+
+    // Update the image label and histogram chart
+    updateFigures();
+}
+
+//
 // Perform histogram equalization
 //
 void MainWindow::on_actionHistogram_Equalization_triggered()
 {
     vector<int> hist(256 * (*curImg).channels(), 0);        // Histogram
     vector<int> cumHist(256 * (*curImg).channels(), 0);     // Cumulative histogram
-    vector<double> cumPdf(256 * (*curImg).channels(), 0);   // Cumulative distribution function
     vector<int> lut(256 * (*curImg).channels(), 0);         // Look up table for histogram equalization
     double scale = 255.0 / ((*curImg).rows * (*curImg).cols);
 
