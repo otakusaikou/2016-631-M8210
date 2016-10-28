@@ -80,6 +80,8 @@ private slots:
 
     void on_actionLaplace_filter_triggered();
 
+    void on_actionMedian_Filter_triggered();
+
 private:
     Ui::MainWindow *ui;
 
@@ -90,6 +92,8 @@ private:
     int reflect(const int &M, const int &x);
 
     void convolve(const cv::Mat &imgSrc, cv::Mat &imgDst, const double *mask, const int &maskRows, const int &maskCols);
+
+    void median(const cv::Mat &imgSrc, cv::Mat &imgDst, const int &maskRows, const int &maskCols);
 
     void genGaussianFilter(const int &size, const double &sigma, double *gFilter);
 };

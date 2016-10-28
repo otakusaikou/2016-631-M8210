@@ -27,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionHistogram_Equalization->setDisabled(true);    // Histogram equalization
     ui->actionAveraging_Filter->setDisabled(true);          // Spatial filtering operations
     ui->actionGaussian_Filter->setDisabled(true);
+    ui->actionMedian_Filter->setDisabled(true);
     ui->actionLaplace_filter->setDisabled(true);
 
 }
@@ -109,6 +110,7 @@ void MainWindow::on_actionOpen_triggered()
     // Enable spatial filtering operations
     ui->actionAveraging_Filter->setDisabled(false);
     ui->actionGaussian_Filter->setDisabled(false);
+    ui->actionMedian_Filter->setDisabled(false);
     ui->actionLaplace_filter->setDisabled(false);
 }
 
@@ -541,7 +543,8 @@ void MainWindow::on_actionAveraging_Filter_triggered()
     int maskCols = maskSizeDialog->cols;
 
     // Check the mask size
-    if (maskRows % 2 == 0 || maskCols % 2 == 0) {
+    if (maskRows % 2 == 0 || maskCols % 2 == 0)
+    {
         msgBox = QMessageBox::warning(this,
                      tr("Mask size error"),
                      tr("Mask row and col numbers must be odd.\n"));
@@ -608,7 +611,8 @@ void MainWindow::on_actionGaussian_Filter_triggered()
     bool timing = gMaskDialog->timing;
 
     // Check the filter size
-    if (size % 2 == 0) {
+    if (size % 2 == 0)
+    {
         msgBox = QMessageBox::warning(this,
                      tr("Filter size error"),
                      tr("Filter size must be odd.\n"));
@@ -645,12 +649,61 @@ void MainWindow::on_actionGaussian_Filter_triggered()
 }
 
 //
+// Smooth the image with median filter
+//
+void MainWindow::on_actionMedian_Filter_triggered()
+{
+    // Get the mask size
+    MaskSizeDialog *maskSizeDialog = new MaskSizeDialog(this);
+    if (maskSizeDialog->exec() == QDialog::Rejected) return;
+    int maskRows = maskSizeDialog->rows;
+    int maskCols = maskSizeDialog->cols;
+    bool timing = maskSizeDialog->timing;
+
+    // Check the mask size
+    if (maskRows % 2 == 0 || maskCols % 2 == 0)
+    {
+        msgBox = QMessageBox::warning(this,
+                     tr("Mask size error"),
+                     tr("Mask row and col numbers must be odd.\n"));
+        return;
+    }
+
+    // Generate new image
+    bufTmp.release();
+    if ((*curImg).channels() == 1)
+    {               // For grayscale image
+        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC1);
+    } else{         // For color image
+        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC3);
+    }
+
+    // Measure the computation time
+    if (timing)
+    {
+        const clock_t begin_time = clock();
+        median((*curImg), bufTmp, maskRows, maskCols);
+        QString msg = "It took " +
+                QString::number((float(clock () - begin_time) / CLOCKS_PER_SEC), 'f', 3) +
+                " seconds for the smoothing operation";
+        msgBox = QMessageBox::information(this, tr("Computation time"), msg);
+    } else {
+        median((*curImg), bufTmp, maskRows, maskCols);
+    }
+
+    // Update the image label and histogram chart
+    (*curImg).release();
+    bufTmp.copyTo((*curImg));
+    updateFigures();
+}
+
+//
 // Sharpen the image with Laplace filter
 //
 void MainWindow::on_actionLaplace_filter_triggered()
 {
-    // Create the mask, mode2: Laplace filter Mask
-    MaskDialog *maskDialog = new MaskDialog(3, 3, 2, this);
+    // Create the mask, mode1: Laplace filter Mask
+    MaskDialog *maskDialog = new MaskDialog(3, 3, 1, this);
     if (maskDialog->exec() == QDialog::Rejected) return;
 
     // Create mask array
@@ -876,6 +929,40 @@ void MainWindow::convolve(const Mat &imgSrc, Mat &imgDst, const double *mask, co
                 }
                 imgDst.data[imgDst.channels() * (imgDst.cols*i + j) + k] =
                         saturate_cast<uchar>(newVal);
+            }
+        }
+    }
+}
+
+// Assign new values with median within the mask
+void MainWindow::median(const Mat &imgSrc, Mat &imgDst, const int &maskRows, const int &maskCols)
+{
+    int r1;             // The pixel index emcompassed by the mask
+    int c1;
+    // Traverse all the pixels in source image
+    for (int i = 0; i < imgSrc.rows; ++i)
+    {
+        for (int j = 0; j < imgSrc.cols; ++j)
+        {
+            for (int k = 0; k < imgSrc.channels(); ++k)
+            {
+                // Traverse all the values in the mask
+                vector<uchar> valVec;      // Vector for finding the median
+                for (int ii = -(maskRows/2); ii <= (maskRows/2); ++ii)
+                {
+                    for (int jj = -(maskCols/2); jj <= (maskCols/2); ++jj)
+                    {
+                        r1 = reflect(imgSrc.rows, i - ii);
+                        c1 = reflect(imgSrc.cols, j - jj);
+                        valVec.push_back(imgSrc.data[imgSrc.channels() * (imgSrc.cols*r1 + c1) + k]);
+                    }
+
+                }
+
+                // Find the median
+                sort(valVec.begin(), valVec.end());
+                imgDst.data[imgDst.channels() * (imgDst.cols*i + j) + k] =
+                        saturate_cast<uchar>(valVec[valVec.size() / 2]);
             }
         }
     }

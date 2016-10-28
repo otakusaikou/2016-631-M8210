@@ -364,6 +364,7 @@
       </property>
       <addaction name="actionAveraging_Filter"/>
       <addaction name="actionGaussian_Filter"/>
+      <addaction name="actionMedian_Filter"/>
      </widget>
      <widget class="QMenu" name="menuSharpening">
       <property name="title">
@@ -401,6 +402,7 @@
    <addaction name="actionHistogram_Equalization"/>
    <addaction name="actionAveraging_Filter"/>
    <addaction name="actionGaussian_Filter"/>
+   <addaction name="actionMedian_Filter"/>
    <addaction name="actionLaplace_filter"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -513,6 +515,11 @@
   <action name="actionLaplace_filter">
    <property name="text">
     <string>Laplace filter</string>
+   </property>
+  </action>
+  <action name="actionMedian_Filter">
+   <property name="text">
+    <string>Median Filter</string>
    </property>
   </action>
  </widget>

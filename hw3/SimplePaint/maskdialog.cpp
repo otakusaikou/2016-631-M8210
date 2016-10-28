@@ -27,21 +27,7 @@ MaskDialog::MaskDialog(const int &rows, const int &cols, const int &mode, QWidge
             ui->numSpinBox->setValue(1);
             ui->denSpinBox->setValue(rows*cols);
             break;
-        case 1:         // Gaussian filter mask
-            for (int i = 0; i < rows; ++i)
-            {
-                for (int j = 0; j < cols; ++j)
-                {
-                    index = model->index(i, j, QModelIndex());
-                    model->setData(index, 1);
-                }
-
-            }
-            // Set the multiplier parameters
-            ui->numSpinBox->setValue(1);
-            ui->denSpinBox->setValue(rows*cols);
-            break;
-        case 2:         //  Laplace filter mask
+        case 1:         //  Laplace filter mask
             for (int i = 0; i < rows; ++i)
             {
                 for (int j = 0; j < cols; ++j)
