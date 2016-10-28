@@ -8,5 +8,10 @@
         <file>icons/gray-scale-B-icon.png</file>
         <file>icons/threshold-icon.png</file>
         <file>icons/histogram-equalization.png</file>
+        <file>icons/gaussian-blur-icon.png</file>
+        <file>icons/minimum-filter-icon.png</file>
+        <file>icons/maximum-filter-icon.png</file>
+        <file>icons/median-filter-icon.png</file>
+        <file>icons/averaging-filter-icon.png</file>
     </qresource>
 </RCC>

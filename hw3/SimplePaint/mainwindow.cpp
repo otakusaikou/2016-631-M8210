@@ -13,22 +13,22 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowTitle("SimplePaint");
 
     // Disable some features first
-    ui->actionSave->setDisabled(true);                      // Save
-    ui->actionReset->setDisabled(true);                     // Reset
-    ui->actionConvert_to_GRAY_Type_A->setDisabled(true);    // Grayscale conversion function
-    ui->actionConvert_to_GRAY_Type_B->setDisabled(true);
-    ui->actionThreshold->setDisabled(true);                 // Thresholding function
-    ui->contrastSlider->setDisabled(true);                  // Contrast and Brightness slider
-    ui->brightnessSlider->setDisabled(true);
-    ui->resizeButton->setDisabled(true);                    // Resize
-    ui->resizeSpinBox->setDisabled(true);
-    ui->grayscaleComboBox->setDisabled(true);               // Grayscale modification
-    ui->changeButton->setDisabled(true);
-    ui->actionHistogram_Equalization->setDisabled(true);    // Histogram equalization
-    ui->actionAveraging_Filter->setDisabled(true);          // Spatial filtering operations
-    ui->actionGaussian_Filter->setDisabled(true);
-    ui->actionMedian_Filter->setDisabled(true);
-    ui->actionLaplace_filter->setDisabled(true);
+    //ui->actionSave->setDisabled(true);                      // Save
+    //ui->actionReset->setDisabled(true);                     // Reset
+    //ui->actionConvert_to_GRAY_Type_A->setDisabled(true);    // Grayscale conversion function
+    //ui->actionConvert_to_GRAY_Type_B->setDisabled(true);
+    //ui->actionThreshold->setDisabled(true);                 // Thresholding function
+    //ui->contrastSlider->setDisabled(true);                  // Contrast and Brightness slider
+    //ui->brightnessSlider->setDisabled(true);
+    //ui->resizeButton->setDisabled(true);                    // Resize
+    //ui->resizeSpinBox->setDisabled(true);
+    //ui->grayscaleComboBox->setDisabled(true);               // Grayscale modification
+    //ui->changeButton->setDisabled(true);
+    //ui->actionHistogram_Equalization->setDisabled(true);    // Histogram equalization
+    //ui->actionAveraging_Filter->setDisabled(true);          // Spatial filtering operations
+    //ui->actionGaussian_Filter->setDisabled(true);
+    //ui->actionMedian_Filter->setDisabled(true);
+    //ui->actionLaplace_filter->setDisabled(true);
 
 }
 
@@ -111,6 +111,8 @@ void MainWindow::on_actionOpen_triggered()
     ui->actionAveraging_Filter->setDisabled(false);
     ui->actionGaussian_Filter->setDisabled(false);
     ui->actionMedian_Filter->setDisabled(false);
+    ui->actionMaxminum_Filter->setDisabled(false);
+    ui->actionMinimum_Filter->setDisabled(false);
     ui->actionLaplace_filter->setDisabled(false);
 }
 
@@ -698,6 +700,104 @@ void MainWindow::on_actionMedian_Filter_triggered()
 }
 
 //
+// Generate new image with maximum filter
+//
+void MainWindow::on_actionMaxminum_Filter_triggered()
+{
+    // Get the mask size
+    MaskSizeDialog *maskSizeDialog = new MaskSizeDialog(this);
+    if (maskSizeDialog->exec() == QDialog::Rejected) return;
+    int maskRows = maskSizeDialog->rows;
+    int maskCols = maskSizeDialog->cols;
+    bool timing = maskSizeDialog->timing;
+
+    // Check the mask size
+    if (maskRows % 2 == 0 || maskCols % 2 == 0)
+    {
+        msgBox = QMessageBox::warning(this,
+                     tr("Mask size error"),
+                     tr("Mask row and col numbers must be odd.\n"));
+        return;
+    }
+
+    // Generate new image
+    bufTmp.release();
+    if ((*curImg).channels() == 1)
+    {               // For grayscale image
+        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC1);
+    } else{         // For color image
+        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC3);
+    }
+
+    // Measure the computation time
+    if (timing)
+    {
+        const clock_t begin_time = clock();
+        max((*curImg), bufTmp, maskRows, maskCols);
+        QString msg = "It took " +
+                QString::number((float(clock () - begin_time) / CLOCKS_PER_SEC), 'f', 3) +
+                " seconds for the smoothing operation";
+        msgBox = QMessageBox::information(this, tr("Computation time"), msg);
+    } else {
+        max((*curImg), bufTmp, maskRows, maskCols);
+    }
+
+    // Update the image label and histogram chart
+    (*curImg).release();
+    bufTmp.copyTo((*curImg));
+    updateFigures();
+}
+
+//
+// Generate new image with minimum filter
+//
+void MainWindow::on_actionMinimum_Filter_triggered()
+{
+    // Get the mask size
+    MaskSizeDialog *maskSizeDialog = new MaskSizeDialog(this);
+    if (maskSizeDialog->exec() == QDialog::Rejected) return;
+    int maskRows = maskSizeDialog->rows;
+    int maskCols = maskSizeDialog->cols;
+    bool timing = maskSizeDialog->timing;
+
+    // Check the mask size
+    if (maskRows % 2 == 0 || maskCols % 2 == 0)
+    {
+        msgBox = QMessageBox::warning(this,
+                     tr("Mask size error"),
+                     tr("Mask row and col numbers must be odd.\n"));
+        return;
+    }
+
+    // Generate new image
+    bufTmp.release();
+    if ((*curImg).channels() == 1)
+    {               // For grayscale image
+        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC1);
+    } else{         // For color image
+        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC3);
+    }
+
+    // Measure the computation time
+    if (timing)
+    {
+        const clock_t begin_time = clock();
+        min((*curImg), bufTmp, maskRows, maskCols);
+        QString msg = "It took " +
+                QString::number((float(clock () - begin_time) / CLOCKS_PER_SEC), 'f', 3) +
+                " seconds for the smoothing operation";
+        msgBox = QMessageBox::information(this, tr("Computation time"), msg);
+    } else {
+        min((*curImg), bufTmp, maskRows, maskCols);
+    }
+
+    // Update the image label and histogram chart
+    (*curImg).release();
+    bufTmp.copyTo((*curImg));
+    updateFigures();
+}
+
+//
 // Sharpen the image with Laplace filter
 //
 void MainWindow::on_actionLaplace_filter_triggered()
@@ -934,7 +1034,37 @@ void MainWindow::convolve(const Mat &imgSrc, Mat &imgDst, const double *mask, co
     }
 }
 
-// Assign new values with median within the mask
+//
+// Generate gaussian filter
+//
+void MainWindow::genGaussianFilter(const int &size, const double &sigma, double *gFilter)
+{
+    double r;
+    double s = 2.0 * sigma * sigma;
+
+    // Sum of all values for normalization
+    double sum = 0.0;
+
+    // Generate filter with given size
+    for (int x = -(size/2); x <= (size/2); ++x)
+    {
+        for(int y = -(size/2); y <= (size/2); ++y)
+        {
+            r = sqrt(x*x + y*y);
+            gFilter[size*(x+(size/2)) + (y+(size/2))] = (exp(-(r*r)/s)) / (M_PI * s);
+            sum += gFilter[size*(x+(size/2)) + (y+(size/2))];
+        }
+    }
+
+    // Normalize the filter
+    for(int i = 0; i < size; ++i)
+        for(int j = 0; j < size; ++j)
+            gFilter[size*i + j] /= sum;
+}
+
+//
+// Assign new value with median within the mask
+//
 void MainWindow::median(const Mat &imgSrc, Mat &imgDst, const int &maskRows, const int &maskCols)
 {
     int r1;             // The pixel index emcompassed by the mask
@@ -969,29 +1099,73 @@ void MainWindow::median(const Mat &imgSrc, Mat &imgDst, const int &maskRows, con
 }
 
 //
-// Generate gaussian filter
+// Assign new value with maximum gray vlaue within the mask
 //
-void MainWindow::genGaussianFilter(const int &size, const double &sigma, double *gFilter)
+void MainWindow::max(const Mat &imgSrc, Mat &imgDst, const int &maskRows, const int &maskCols)
 {
-    double r;
-    double s = 2.0 * sigma * sigma;
-
-    // Sum of all values for normalization
-    double sum = 0.0;
-
-    // Generate filter with given size
-    for (int x = -(size/2); x <= (size/2); ++x)
+    uchar newVal;      // The new value
+    int r1;             // The pixel index emcompassed by the mask
+    int c1;
+    // Traverse all the pixels in source image
+    for (int i = 0; i < imgSrc.rows; ++i)
     {
-        for(int y = -(size/2); y <= (size/2); ++y)
+        for (int j = 0; j < imgSrc.cols; ++j)
         {
-            r = sqrt(x*x + y*y);
-            gFilter[size*(x+(size/2)) + (y+(size/2))] = (exp(-(r*r)/s)) / (M_PI * s);
-            sum += gFilter[size*(x+(size/2)) + (y+(size/2))];
+            for (int k = 0; k < imgSrc.channels(); ++k)
+            {
+                // Traverse all the coefficients in the mask
+                newVal = 0;
+                for (int ii = -(maskRows/2); ii <= (maskRows/2); ++ii)
+                {
+                    for (int jj = -(maskCols/2); jj <= (maskCols/2); ++jj)
+                    {
+                        r1 = reflect(imgSrc.rows, i - ii);
+                        c1 = reflect(imgSrc.cols, j - jj);
+                        if (imgSrc.data[imgSrc.channels() * (imgSrc.cols*r1 + c1) + k] > newVal)
+                        {
+                            newVal = imgSrc.data[imgSrc.channels() * (imgSrc.cols*r1 + c1) + k];
+                        }
+                    }
+                }
+                imgDst.data[imgDst.channels() * (imgDst.cols*i + j) + k] =
+                        saturate_cast<uchar>(newVal);
+            }
         }
     }
+}
 
-    // Normalize the filter
-    for(int i = 0; i < size; ++i)
-        for(int j = 0; j < size; ++j)
-            gFilter[size*i + j] /= sum;
+//
+// Assign new value with minimum gray vlaue within the mask
+//
+void MainWindow::min(const Mat &imgSrc, Mat &imgDst, const int &maskRows, const int &maskCols)
+{
+    uchar newVal;      // The new value
+    int r1;             // The pixel index emcompassed by the mask
+    int c1;
+    // Traverse all the pixels in source image
+    for (int i = 0; i < imgSrc.rows; ++i)
+    {
+        for (int j = 0; j < imgSrc.cols; ++j)
+        {
+            for (int k = 0; k < imgSrc.channels(); ++k)
+            {
+                // Traverse all the coefficients in the mask
+                newVal = 255;
+                for (int ii = -(maskRows/2); ii <= (maskRows/2); ++ii)
+                {
+                    for (int jj = -(maskCols/2); jj <= (maskCols/2); ++jj)
+                    {
+                        r1 = reflect(imgSrc.rows, i - ii);
+                        c1 = reflect(imgSrc.cols, j - jj);
+                        if (imgSrc.data[imgSrc.channels() * (imgSrc.cols*r1 + c1) + k] < newVal)
+                        {
+                            newVal = imgSrc.data[imgSrc.channels() * (imgSrc.cols*r1 + c1) + k];
+                        }
+                    }
+                }
+                imgDst.data[imgDst.channels() * (imgDst.cols*i + j) + k] =
+                        saturate_cast<uchar>(newVal);
+            }
+        }
+    }
 }

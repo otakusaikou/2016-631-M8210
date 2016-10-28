@@ -372,8 +372,16 @@
       </property>
       <addaction name="actionLaplace_filter"/>
      </widget>
+     <widget class="QMenu" name="menuOthers">
+      <property name="title">
+       <string>Others</string>
+      </property>
+      <addaction name="actionMaxminum_Filter"/>
+      <addaction name="actionMinimum_Filter"/>
+     </widget>
      <addaction name="menuSmoothing"/>
      <addaction name="menuSharpening"/>
+     <addaction name="menuOthers"/>
     </widget>
     <addaction name="actionReset"/>
     <addaction name="actionConvert_to_GRAY_Type_A"/>
@@ -403,6 +411,8 @@
    <addaction name="actionAveraging_Filter"/>
    <addaction name="actionGaussian_Filter"/>
    <addaction name="actionMedian_Filter"/>
+   <addaction name="actionMaxminum_Filter"/>
+   <addaction name="actionMinimum_Filter"/>
    <addaction name="actionLaplace_filter"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -431,6 +441,9 @@
    </property>
   </action>
   <action name="actionConvert_to_GRAY_Type_A">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="myres.qrc">
      <normaloff>:/Icon/icons/gray-scale-A-icon.png</normaloff>:/Icon/icons/gray-scale-A-icon.png</iconset>
@@ -443,6 +456,9 @@
    </property>
   </action>
   <action name="actionConvert_to_GRAY_Type_B">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="myres.qrc">
      <normaloff>:/Icon/icons/gray-scale-B-icon.png</normaloff>:/Icon/icons/gray-scale-B-icon.png</iconset>
@@ -455,6 +471,9 @@
    </property>
   </action>
   <action name="actionSave">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="myres.qrc">
      <normaloff>:/Icon/icons/document-save.svg</normaloff>:/Icon/icons/document-save.svg</iconset>
@@ -467,6 +486,9 @@
    </property>
   </action>
   <action name="actionReset">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="myres.qrc">
      <normaloff>:/Icon/icons/document-revert.svg</normaloff>:/Icon/icons/document-revert.svg</iconset>
@@ -479,6 +501,9 @@
    </property>
   </action>
   <action name="actionThreshold">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="myres.qrc">
      <normaloff>:/Icon/icons/threshold-icon.png</normaloff>:/Icon/icons/threshold-icon.png</iconset>
@@ -491,6 +516,9 @@
    </property>
   </action>
   <action name="actionHistogram_Equalization">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="myres.qrc">
      <normaloff>:/Icon/icons/histogram-equalization.png</normaloff>:/Icon/icons/histogram-equalization.png</iconset>
@@ -503,23 +531,71 @@
    </property>
   </action>
   <action name="actionAveraging_Filter">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="myres.qrc">
+     <normaloff>:/Icon/icons/averaging-filter-icon.png</normaloff>:/Icon/icons/averaging-filter-icon.png</iconset>
+   </property>
    <property name="text">
     <string>Averaging Filter</string>
    </property>
   </action>
   <action name="actionGaussian_Filter">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="myres.qrc">
+     <normaloff>:/Icon/icons/gaussian-blur-icon.png</normaloff>:/Icon/icons/gaussian-blur-icon.png</iconset>
+   </property>
    <property name="text">
     <string>Gaussian Filter</string>
    </property>
   </action>
   <action name="actionLaplace_filter">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
-    <string>Laplace filter</string>
+    <string>Laplace Filter</string>
    </property>
   </action>
   <action name="actionMedian_Filter">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="myres.qrc">
+     <normaloff>:/Icon/icons/median-filter-icon.png</normaloff>:/Icon/icons/median-filter-icon.png</iconset>
+   </property>
    <property name="text">
     <string>Median Filter</string>
+   </property>
+  </action>
+  <action name="actionMaxminum_Filter">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="myres.qrc">
+     <normaloff>:/Icon/icons/maximum-filter-icon.png</normaloff>:/Icon/icons/maximum-filter-icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Maximum Filter</string>
+   </property>
+  </action>
+  <action name="actionMinimum_Filter">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="myres.qrc">
+     <normaloff>:/Icon/icons/minimum-filter-icon.png</normaloff>:/Icon/icons/minimum-filter-icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Minimum Filter</string>
    </property>
   </action>
  </widget>
