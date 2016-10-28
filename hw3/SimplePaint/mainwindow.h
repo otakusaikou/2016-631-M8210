@@ -19,6 +19,7 @@
 #include <ctime>
 #include "masksizedialog.h"
 #include "maskdialog.h"
+#include "gmaskdialog.h"
 
 typedef unsigned char uchar;
 
@@ -43,9 +44,6 @@ public:
     double alpha;           // Contrast parameter
     double beta;            // Brightness parameter
     int msgBox;
-
-    MaskSizeDialog *maskSizeDialog;
-    MaskDialog *maskDialog;
 
 private slots:
     void on_actionOpen_triggered();
@@ -78,6 +76,8 @@ private slots:
 
     void on_actionAveraging_Filter_triggered();
 
+    void on_actionGaussian_Filter_triggered();
+
     void on_actionLaplace_filter_triggered();
 
 private:
@@ -90,6 +90,8 @@ private:
     int reflect(const int &M, const int &x);
 
     void convolve(const cv::Mat &imgSrc, cv::Mat &imgDst, const double *mask, const int &maskRows, const int &maskCols);
+
+    void genGaussianFilter(const int &size, const double &sigma, double *gFilter);
 };
 
 #endif // MAINWINDOW_H

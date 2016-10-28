@@ -13,7 +13,7 @@ MaskDialog::MaskDialog(const int &rows, const int &cols, const int &mode, QWidge
     QModelIndex index;
     switch (mode)
     {
-        case 0:         // averaging filter mask
+        case 0:         // Averaging filter mask
             for (int i = 0; i < rows; ++i)
             {
                 for (int j = 0; j < cols; ++j)

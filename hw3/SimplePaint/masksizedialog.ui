@@ -91,7 +91,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QCheckBox" name="timeCheckBox">
+      <widget class="QCheckBox" name="timingCheckBox">
        <property name="font">
         <font>
          <pointsize>12</pointsize>

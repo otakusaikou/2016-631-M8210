@@ -15,9 +15,12 @@ MaskSizeDialog::~MaskSizeDialog()
     delete ui;
 }
 
+//
+// Apply the settings as dialog object attributes
+//
 void MaskSizeDialog::on_buttonBox_accepted()
 {
     rows = ui->rowSpinBox->value();
     cols = ui->colSpinBox->value();
-    timing = ui->timeCheckBox->checkState() == Qt::Checked;
+    timing = ui->timingCheckBox->checkState() == Qt::Checked;
 }

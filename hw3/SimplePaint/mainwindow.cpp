@@ -535,14 +535,23 @@ void MainWindow::on_actionHistogram_Equalization_triggered()
 void MainWindow::on_actionAveraging_Filter_triggered()
 {
     // Get the mask size
-    maskSizeDialog = new MaskSizeDialog(this);
+    MaskSizeDialog *maskSizeDialog = new MaskSizeDialog(this);
     if (maskSizeDialog->exec() == QDialog::Rejected) return;
     int maskRows = maskSizeDialog->rows;
     int maskCols = maskSizeDialog->cols;
+
+    // Check the mask size
+    if (maskRows % 2 == 0 || maskCols % 2 == 0) {
+        msgBox = QMessageBox::warning(this,
+                     tr("Mask size error"),
+                     tr("Mask row and col numbers must be odd.\n"));
+        return;
+    }
+
     bool timing = maskSizeDialog->timing;
 
     // Create the mask, mode0: averaging filter Mask
-    maskDialog = new MaskDialog(maskRows, maskCols, 0, this);
+    MaskDialog *maskDialog = new MaskDialog(maskRows, maskCols, 0, this);
     if (maskDialog->exec() == QDialog::Rejected) return;
 
     // Create mask array
@@ -579,10 +588,55 @@ void MainWindow::on_actionAveraging_Filter_triggered()
         convolve((*curImg), bufTmp, mask, maskRows, maskCols);
     }
 
-    // Clean dialog objects and mask array
-    delete maskSizeDialog;
-    delete maskDialog;
-    delete []mask;
+    // Update the image label and histogram chart
+    (*curImg).release();
+    bufTmp.copyTo((*curImg));
+    updateFigures();
+}
+
+//
+// Perform image blurring with gaussian filter
+//
+void MainWindow::on_actionGaussian_Filter_triggered()
+{
+    // Get the gaussian filter
+    GMaskDialog *gMaskDialog = new GMaskDialog(this);
+    if (gMaskDialog->exec() == QDialog::Rejected) return;
+    int size = gMaskDialog->size;
+    double sigma = gMaskDialog->sigma;
+    double *gFilter = new double[size*size];
+    bool timing = gMaskDialog->timing;
+
+    // Check the filter size
+    if (size % 2 == 0) {
+        msgBox = QMessageBox::warning(this,
+                     tr("Filter size error"),
+                     tr("Filter size must be odd.\n"));
+        return;
+    }
+
+    genGaussianFilter(size, sigma, gFilter);
+
+    // Generate new image
+    bufTmp.release();
+    if ((*curImg).channels() == 1)
+    {               // For grayscale image
+        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC1);
+    } else{         // For color image
+        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC3);
+    }
+
+    if (timing)
+    {
+        const clock_t begin_time = clock();
+        convolve((*curImg), bufTmp, gFilter, size, size);
+        QString msg = "It took " +
+                QString::number((float(clock () - begin_time) / CLOCKS_PER_SEC), 'f', 3) +
+                " seconds for the smoothing operation";
+        msgBox = QMessageBox::information(this, tr("Computation time"), msg);
+    } else {
+        convolve((*curImg), bufTmp, gFilter, size, size);
+    }
 
     // Update the image label and histogram chart
     (*curImg).release();
@@ -596,7 +650,7 @@ void MainWindow::on_actionAveraging_Filter_triggered()
 void MainWindow::on_actionLaplace_filter_triggered()
 {
     // Create the mask, mode2: Laplace filter Mask
-    maskDialog = new MaskDialog(3, 3, 2, this);
+    MaskDialog *maskDialog = new MaskDialog(3, 3, 2, this);
     if (maskDialog->exec() == QDialog::Rejected) return;
 
     // Create mask array
@@ -620,10 +674,6 @@ void MainWindow::on_actionLaplace_filter_triggered()
         bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC3);
     }
     convolve((*curImg), bufTmp, mask, 3, 3);
-
-    // Clean dialog object and mask array
-    delete maskDialog;
-    delete []mask;
 
     // Update the image label and histogram chart
     (*curImg).release();
@@ -829,4 +879,32 @@ void MainWindow::convolve(const Mat &imgSrc, Mat &imgDst, const double *mask, co
             }
         }
     }
+}
+
+//
+// Generate gaussian filter
+//
+void MainWindow::genGaussianFilter(const int &size, const double &sigma, double *gFilter)
+{
+    double r;
+    double s = 2.0 * sigma * sigma;
+
+    // Sum of all values for normalization
+    double sum = 0.0;
+
+    // Generate filter with given size
+    for (int x = -(size/2); x <= (size/2); ++x)
+    {
+        for(int y = -(size/2); y <= (size/2); ++y)
+        {
+            r = sqrt(x*x + y*y);
+            gFilter[size*(x+(size/2)) + (y+(size/2))] = (exp(-(r*r)/s)) / (M_PI * s);
+            sum += gFilter[size*(x+(size/2)) + (y+(size/2))];
+        }
+    }
+
+    // Normalize the filter
+    for(int i = 0; i < size; ++i)
+        for(int j = 0; j < size; ++j)
+            gFilter[size*i + j] /= sum;
 }

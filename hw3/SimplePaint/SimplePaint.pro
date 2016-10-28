@@ -15,15 +15,18 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     masksizedialog.cpp \
-    maskdialog.cpp
+    maskdialog.cpp \
+    gmaskdialog.cpp
 
 HEADERS  += mainwindow.h \
     masksizedialog.h \
-    maskdialog.h
+    maskdialog.h \
+    gmaskdialog.h
 
 FORMS    += mainwindow.ui \
     masksizedialog.ui \
-    maskdialog.ui
+    maskdialog.ui \
+    gmaskdialog.ui
 
 # User defined settings
 QT       += charts
