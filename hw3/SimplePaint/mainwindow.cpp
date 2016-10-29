@@ -124,7 +124,7 @@ void MainWindow::on_actionConvert_to_GRAY_Type_A_triggered()
     }
 
     // Don't do anything if current image is grayscale image
-    if ((*curImg).channels() == 1) return;
+    if (curImg->channels() == 1) return;
 
     uchar newVal;
     // Create a new gray image buffer
@@ -174,7 +174,7 @@ void MainWindow::on_actionConvert_to_GRAY_Type_B_triggered()
     }
 
     // Don't do anything if current image is grayscale image
-    if ((*curImg).channels() == 1) return;
+    if (curImg->channels() == 1) return;
 
     uchar newVal;
     // Create a new gray image buffer
@@ -239,7 +239,7 @@ void MainWindow::on_actionSave_triggered()
 
         // Copy the result to the image save buffer
         Mat bufSave;
-        (*curImg).copyTo(bufSave);
+        curImg->copyTo(bufSave);
 
         // If current image is color image, convert it from rgb to bgr
         if (bufSave.channels() > 1)
@@ -355,17 +355,17 @@ void MainWindow::on_contrastSlider_sliderPressed()
 void MainWindow::on_contrastSlider_sliderReleased()
 {
     // The new_image = alpha * old_image
-    for(int i = 0; i < (*curImg).rows; ++i)
+    for(int i = 0; i < curImg->rows; ++i)
     {
-        for(int j = 0; j < (*curImg).cols; ++j)
+        for(int j = 0; j < curImg->cols; ++j)
         {
-            for(int k = 0; k < (*curImg).channels(); ++k)
+            for(int k = 0; k < curImg->channels(); ++k)
             {
                 // Assign the new value to the image buffer on the display
-                (*curImg).data[(*curImg).channels() * ((*curImg).cols*i + j) + k] =
+                curImg->data[curImg->channels() * (curImg->cols*i + j) + k] =
                         saturate_cast<uchar>(
                             ((2.0/100) * ui->contrastSlider->value()/alpha) *
-                            ((*curImg).data[(*curImg).channels() * ((*curImg).cols*i + j) + k]));
+                            (curImg->data[curImg->channels() * (curImg->cols*i + j) + k]));
             }
         }
     }
@@ -388,16 +388,16 @@ void MainWindow::on_brightnessSlider_sliderPressed()
 void MainWindow::on_brightnessSlider_sliderReleased()
 {
     // The new_image = old_image + beta
-    for(int i = 0; i < (*curImg).rows; ++i)
+    for(int i = 0; i < curImg->rows; ++i)
     {
-        for(int j = 0; j < (*curImg).cols; ++j)
+        for(int j = 0; j < curImg->cols; ++j)
         {
-            for(int k = 0; k < (*curImg).channels(); ++k)
+            for(int k = 0; k < curImg->channels(); ++k)
             {
                 // Assign the new value to the image buffer on the display
-                (*curImg).data[(*curImg).channels() * ((*curImg).cols*i + j) + k] =
+                curImg->data[curImg->channels() * (curImg->cols*i + j) + k] =
                         saturate_cast<uchar>(
-                            (*curImg).data[(*curImg).channels() * ((*curImg).cols*i + j) + k] -
+                            curImg->data[curImg->channels() * (curImg->cols*i + j) + k] -
                             beta + (255.0/100) * ui->brightnessSlider->value() - 127.5);
             }
         }
@@ -414,17 +414,17 @@ void MainWindow::on_resizeButton_clicked()
 {
     double scale = ui->resizeSpinBox->value();
     bufTmp.release();
-    if ((*curImg).channels() == 1)
+    if (curImg->channels() == 1)
     {                       // For grayscale image
-        bufTmp = Mat::zeros(static_cast<int>((*curImg).rows*scale), static_cast<int>((*curImg).cols*scale), CV_8UC1);
+        bufTmp = Mat::zeros(static_cast<int>(curImg->rows*scale), static_cast<int>(curImg->cols*scale), CV_8UC1);
     } else{                 // For color image
-        bufTmp = Mat::zeros(static_cast<int>((*curImg).rows*scale), static_cast<int>((*curImg).cols*scale), CV_8UC3);
+        bufTmp = Mat::zeros(static_cast<int>(curImg->rows*scale), static_cast<int>(curImg->cols*scale), CV_8UC3);
     }
     // Resample the image
     resize((*curImg), bufTmp);
 
     // Update the image label and histogram chart
-    (*curImg).release();
+    curImg->release();
     bufTmp.copyTo((*curImg));
     updateFigures();
 }
@@ -437,16 +437,16 @@ void MainWindow::on_changeButton_clicked()
     int scale = pow(2, ui->grayscaleComboBox->count() - (ui->grayscaleComboBox->currentIndex()));
 
     // The new_image = floor(old_image * scale / 256) * (255 / (scale - 1))
-    for(int i = 0; i < (*curImg).rows; ++i)
+    for(int i = 0; i < curImg->rows; ++i)
     {
-        for(int j = 0; j < (*curImg).cols; ++j)
+        for(int j = 0; j < curImg->cols; ++j)
         {
-            for(int k = 0; k < (*curImg).channels(); ++k)
+            for(int k = 0; k < curImg->channels(); ++k)
             {
                 // Assign the new value to the image buffer on the display
-                (*curImg).data[(*curImg).channels() * ((*curImg).cols*i + j) + k] =
+                curImg->data[curImg->channels() * (curImg->cols*i + j) + k] =
                          saturate_cast<uchar>(
-                            floor((1.0*scale/256) * ((*curImg).data[(*curImg).channels() * ((*curImg).cols*i + j) + k])) *
+                            floor((1.0*scale/256) * (curImg->data[curImg->channels() * (curImg->cols*i + j) + k])) *
                             (255/(scale-1)));
             }
         }
@@ -461,25 +461,25 @@ void MainWindow::on_changeButton_clicked()
 //
 void MainWindow::on_actionHistogram_Equalization_triggered()
 {
-    vector<int> hist(256*(*curImg).channels(), 0);        // Histogram
-    vector<int> cumHist(256*(*curImg).channels(), 0);     // Cumulative histogram
-    vector<int> lut(256*(*curImg).channels(), 0);         // Look up table for histogram equalization
-    double scale = 255.0/((*curImg).rows*(*curImg).cols);
+    vector<int> hist(256*curImg->channels(), 0);        // Histogram
+    vector<int> cumHist(256*curImg->channels(), 0);     // Cumulative histogram
+    vector<int> lut(256*curImg->channels(), 0);         // Look up table for histogram equalization
+    double scale = 255.0/(curImg->rows*curImg->cols);
 
     // Calculate the histogram
-    for (int i = 0; i < (*curImg).rows; ++i)
+    for (int i = 0; i < curImg->rows; ++i)
     {
-        for (int j = 0; j < (*curImg).cols; ++j)
+        for (int j = 0; j < curImg->cols; ++j)
         {
-            for (int k = 0; k < (*curImg).channels(); ++k)
+            for (int k = 0; k < curImg->channels(); ++k)
             {
-                ++hist.at(256*k + (*curImg).data[(*curImg).channels() * ((*curImg).cols*i + j) + k]);
+                ++hist.at(256*k + curImg->data[curImg->channels() * (curImg->cols*i + j) + k]);
             }
         }
     }
 
     // Calculate the cumulative histogram
-    for (int k = 0; k < (*curImg).channels(); ++k)
+    for (int k = 0; k < curImg->channels(); ++k)
     {
         for (int i = 0; i < 256; ++i)
         {
@@ -493,7 +493,7 @@ void MainWindow::on_actionHistogram_Equalization_triggered()
     }
 
     // Generate the look up table
-    for (int k = 0; k < (*curImg).channels(); ++k)
+    for (int k = 0; k < curImg->channels(); ++k)
     {
         for (int i = 0; i < 256; ++i)
         {
@@ -502,14 +502,14 @@ void MainWindow::on_actionHistogram_Equalization_triggered()
     }
 
     // Equalize the image
-    for (int i = 0; i < (*curImg).rows; ++i)
+    for (int i = 0; i < curImg->rows; ++i)
     {
-        for (int j = 0; j < (*curImg).cols; ++j)
+        for (int j = 0; j < curImg->cols; ++j)
         {
-            for (int k = 0; k < (*curImg).channels(); ++k)
+            for (int k = 0; k < curImg->channels(); ++k)
             {
-                (*curImg).data[(*curImg).channels() * ((*curImg).cols*i + j) + k] =
-                    lut.at(256*k + (*curImg).data[(*curImg).channels() * ((*curImg).cols*i + j) + k]);
+                curImg->data[curImg->channels() * (curImg->cols*i + j) + k] =
+                    lut.at(256*k + curImg->data[curImg->channels() * (curImg->cols*i + j) + k]);
             }
         }
     }
@@ -558,11 +558,11 @@ void MainWindow::on_actionAveraging_Filter_triggered()
 
     // Generate new image
     bufTmp.release();
-    if ((*curImg).channels() == 1)
+    if (curImg->channels() == 1)
     {               // For grayscale image
-        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC1);
+        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC1);
     } else{         // For color image
-        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC3);
+        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC3);
     }
 
     // Measure the computation time
@@ -579,7 +579,7 @@ void MainWindow::on_actionAveraging_Filter_triggered()
     }
 
     // Update the image label and histogram chart
-    (*curImg).release();
+    curImg->release();
     bufTmp.copyTo((*curImg));
     updateFigures();
 }
@@ -610,11 +610,11 @@ void MainWindow::on_actionGaussian_Filter_triggered()
 
     // Generate new image
     bufTmp.release();
-    if ((*curImg).channels() == 1)
+    if (curImg->channels() == 1)
     {               // For grayscale image
-        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC1);
+        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC1);
     } else{         // For color image
-        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC3);
+        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC3);
     }
 
     if (timing)
@@ -630,7 +630,7 @@ void MainWindow::on_actionGaussian_Filter_triggered()
     }
 
     // Update the image label and histogram chart
-    (*curImg).release();
+    curImg->release();
     bufTmp.copyTo((*curImg));
     updateFigures();
 }
@@ -658,11 +658,11 @@ void MainWindow::on_actionMedian_Filter_triggered()
 
     // Generate new image
     bufTmp.release();
-    if ((*curImg).channels() == 1)
+    if (curImg->channels() == 1)
     {               // For grayscale image
-        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC1);
+        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC1);
     } else{         // For color image
-        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC3);
+        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC3);
     }
 
     // Measure the computation time
@@ -679,7 +679,7 @@ void MainWindow::on_actionMedian_Filter_triggered()
     }
 
     // Update the image label and histogram chart
-    (*curImg).release();
+    curImg->release();
     bufTmp.copyTo((*curImg));
     updateFigures();
 }
@@ -707,11 +707,11 @@ void MainWindow::on_actionMaxminum_Filter_triggered()
 
     // Generate new image
     bufTmp.release();
-    if ((*curImg).channels() == 1)
+    if (curImg->channels() == 1)
     {               // For grayscale image
-        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC1);
+        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC1);
     } else{         // For color image
-        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC3);
+        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC3);
     }
 
     // Measure the computation time
@@ -728,7 +728,7 @@ void MainWindow::on_actionMaxminum_Filter_triggered()
     }
 
     // Update the image label and histogram chart
-    (*curImg).release();
+    curImg->release();
     bufTmp.copyTo((*curImg));
     updateFigures();
 }
@@ -756,11 +756,11 @@ void MainWindow::on_actionMinimum_Filter_triggered()
 
     // Generate new image
     bufTmp.release();
-    if ((*curImg).channels() == 1)
+    if (curImg->channels() == 1)
     {               // For grayscale image
-        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC1);
+        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC1);
     } else{         // For color image
-        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC3);
+        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC3);
     }
 
     // Measure the computation time
@@ -777,7 +777,7 @@ void MainWindow::on_actionMinimum_Filter_triggered()
     }
 
     // Update the image label and histogram chart
-    (*curImg).release();
+    curImg->release();
     bufTmp.copyTo((*curImg));
     updateFigures();
 }
@@ -805,16 +805,16 @@ void MainWindow::on_actionLaplacian_filter_triggered()
 
     // Generate new image
     bufTmp.release();
-    if ((*curImg).channels() == 1)
+    if (curImg->channels() == 1)
     {               // For grayscale image
-        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC1);
+        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC1);
     } else{         // For color image
-        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC3);
+        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC3);
     }
     convolve((*curImg), bufTmp, mask, 3, 3);
 
     // Update the image label and histogram chart
-    (*curImg).release();
+    curImg->release();
     bufTmp.copyTo((*curImg));
     updateFigures();
 }
@@ -846,11 +846,11 @@ void MainWindow::on_actionUnsharp_Masking_triggered()
 
     // Blur the original image
     bufTmp.release();
-    if ((*curImg).channels() == 1)
+    if (curImg->channels() == 1)
     {               // For grayscale image
-        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC1);
+        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC1);
     } else{         // For color image
-        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC3);
+        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC3);
     }
 
     if (timing)
@@ -866,23 +866,23 @@ void MainWindow::on_actionUnsharp_Masking_triggered()
     }
 
     // New image = original image + K * (original image - blurred image)
-    for(int i = 0; i < (*curImg).rows; ++i)
+    for(int i = 0; i < curImg->rows; ++i)
     {
-        for(int j = 0; j < (*curImg).cols; ++j)
+        for(int j = 0; j < curImg->cols; ++j)
         {
-            for(int k = 0; k < (*curImg).channels(); ++k)
+            for(int k = 0; k < curImg->channels(); ++k)
             {
                 // Assign the new value to the image buffer on the display
                 bufTmp.data[bufTmp.channels() * (bufTmp.cols*i + j) + k] =
                         saturate_cast<uchar>(
-                            (1 + K) * ((*curImg).data[(*curImg).channels() * ((*curImg).cols*i + j) + k]) -
+                            (1 + K) * (curImg->data[curImg->channels() * (curImg->cols*i + j) + k]) -
                             K * bufTmp.data[bufTmp.channels() * (bufTmp.cols*i + j) + k]);
             }
         }
     }
 
     // Update the image label and histogram chart
-    (*curImg).release();
+    curImg->release();
     bufTmp.copyTo((*curImg));
     updateFigures();
 }
@@ -904,26 +904,26 @@ void MainWindow::on_actionRender_original_size_image_triggered()
 void MainWindow::updateFigures()
 {
     QImage QImg;
-    vector<int> hist(256*(*curImg).channels(), 0);        // Histogram
+    vector<int> hist(256*curImg->channels(), 0);        // Histogram
 
     // Conver opencv image matrix to QImage object
-    if ((*curImg).channels() == 1)
+    if (curImg->channels() == 1)
     {                       // For grayscale image
-        QImg = QImage((const uchar*) ((*curImg).data),
-                            (*curImg).cols, (*curImg).rows, (*curImg).step1(), QImage::Format_Grayscale8);
+        QImg = QImage((const uchar*) (curImg->data),
+                            curImg->cols, curImg->rows, curImg->step1(), QImage::Format_Grayscale8);
     } else {                // For color image
-        QImg = QImage((const uchar*) ((*curImg).data),
-                            (*curImg).cols, (*curImg).rows, (*curImg).step1(), QImage::Format_RGB888);
+        QImg = QImage((const uchar*) (curImg->data),
+                            curImg->cols, curImg->rows, curImg->step1(), QImage::Format_RGB888);
     }
 
     // Calculate histogram
-    for (int i = 0; i < (*curImg).rows; ++i)
+    for (int i = 0; i < curImg->rows; ++i)
     {
-        for (int j = 0; j < (*curImg).cols; ++j)
+        for (int j = 0; j < curImg->cols; ++j)
         {
-            for (int k = 0; k < (*curImg).channels(); ++k)
+            for (int k = 0; k < curImg->channels(); ++k)
             {
-                ++hist.at(256*k + (*curImg).data[(*curImg).channels() * ((*curImg).cols*i + j) + k]);
+                ++hist.at(256*k + curImg->data[curImg->channels() * (curImg->cols*i + j) + k]);
             }
         }
     }
@@ -944,7 +944,7 @@ void MainWindow::updateFigures()
     QBarSet *set;
     QBarSeries *series = new QBarSeries();
     QColor colorArray[3] = {Qt::red, Qt::green, Qt::blue};
-    for (int k = 0; k < (*curImg).channels(); ++k)
+    for (int k = 0; k < curImg->channels(); ++k)
     {
         set = new QBarSet("Histogram");
         for(int i = 0; i < 256; ++i)

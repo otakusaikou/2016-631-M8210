@@ -13,13 +13,13 @@ ImshowDialog::ImshowDialog(const cv::Mat *curImg, const QString &fileName, QWidg
     QImage QImg;
 
     // Conver opencv image matrix to QImage object
-    if ((*curImg).channels() == 1)
+    if (curImg->channels() == 1)
     {                       // For grayscale image
-        QImg = QImage((const uchar*) ((*curImg).data),
-                            (*curImg).cols, (*curImg).rows, (*curImg).step1(), QImage::Format_Grayscale8);
+        QImg = QImage((const uchar*) (curImg->data),
+                            curImg->cols, curImg->rows, curImg->step1(), QImage::Format_Grayscale8);
     } else {                // For color image
-        QImg = QImage((const uchar*) ((*curImg).data),
-                            (*curImg).cols, (*curImg).rows, (*curImg).step1(), QImage::Format_RGB888);
+        QImg = QImage((const uchar*) (curImg->data),
+                            curImg->cols, curImg->rows, curImg->step1(), QImage::Format_RGB888);
     }
 
     // Update the pixelmap
