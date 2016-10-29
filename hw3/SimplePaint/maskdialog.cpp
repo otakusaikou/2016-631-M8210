@@ -27,7 +27,7 @@ MaskDialog::MaskDialog(const int &rows, const int &cols, const int &mode, QWidge
             ui->numSpinBox->setValue(1);
             ui->denSpinBox->setValue(rows*cols);
             break;
-        case 1:         //  Laplace filter mask
+        case 1:         //  Laplacian filter mask
             for (int i = 0; i < rows; ++i)
             {
                 for (int j = 0; j < cols; ++j)

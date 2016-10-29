@@ -20,6 +20,8 @@
 #include "masksizedialog.h"
 #include "maskdialog.h"
 #include "gmaskdialog.h"
+#include "umaskdialog.h"
+#include "imshowdialog.h"
 
 typedef unsigned char uchar;
 
@@ -82,9 +84,13 @@ private slots:
 
     void on_actionMaxminum_Filter_triggered();
 
-    void on_actionLaplace_filter_triggered();
+    void on_actionLaplacian_filter_triggered();
 
     void on_actionMinimum_Filter_triggered();
+
+    void on_actionUnsharp_Masking_triggered();
+
+    void on_actionRender_original_size_image_triggered();
 
 private:
     Ui::MainWindow *ui;

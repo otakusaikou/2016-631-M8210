@@ -13,5 +13,6 @@
         <file>icons/maximum-filter-icon.png</file>
         <file>icons/median-filter-icon.png</file>
         <file>icons/averaging-filter-icon.png</file>
+        <file>icons/render-image-icon.png</file>
     </qresource>
 </RCC>

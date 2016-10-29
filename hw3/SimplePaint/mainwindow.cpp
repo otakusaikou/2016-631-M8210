@@ -11,25 +11,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowTitle("SimplePaint");
-
-    // Disable some features first
-    //ui->actionSave->setDisabled(true);                      // Save
-    //ui->actionReset->setDisabled(true);                     // Reset
-    //ui->actionConvert_to_GRAY_Type_A->setDisabled(true);    // Grayscale conversion function
-    //ui->actionConvert_to_GRAY_Type_B->setDisabled(true);
-    //ui->actionThreshold->setDisabled(true);                 // Thresholding function
-    //ui->contrastSlider->setDisabled(true);                  // Contrast and Brightness slider
-    //ui->brightnessSlider->setDisabled(true);
-    //ui->resizeButton->setDisabled(true);                    // Resize
-    //ui->resizeSpinBox->setDisabled(true);
-    //ui->grayscaleComboBox->setDisabled(true);               // Grayscale modification
-    //ui->changeButton->setDisabled(true);
-    //ui->actionHistogram_Equalization->setDisabled(true);    // Histogram equalization
-    //ui->actionAveraging_Filter->setDisabled(true);          // Spatial filtering operations
-    //ui->actionGaussian_Filter->setDisabled(true);
-    //ui->actionMedian_Filter->setDisabled(true);
-    //ui->actionLaplace_filter->setDisabled(true);
-
 }
 
 MainWindow::~MainWindow()
@@ -113,7 +94,11 @@ void MainWindow::on_actionOpen_triggered()
     ui->actionMedian_Filter->setDisabled(false);
     ui->actionMaxminum_Filter->setDisabled(false);
     ui->actionMinimum_Filter->setDisabled(false);
-    ui->actionLaplace_filter->setDisabled(false);
+    ui->actionLaplacian_filter->setDisabled(false);
+    ui->actionUnsharp_Masking->setDisabled(false);
+
+    // Enable original size image rendering function
+    ui->actionRender_original_size_image->setDisabled(false);
 }
 
 //
@@ -798,11 +783,11 @@ void MainWindow::on_actionMinimum_Filter_triggered()
 }
 
 //
-// Sharpen the image with Laplace filter
+// Sharpen the image with Laplacian filter
 //
-void MainWindow::on_actionLaplace_filter_triggered()
+void MainWindow::on_actionLaplacian_filter_triggered()
 {
-    // Create the mask, mode1: Laplace filter Mask
+    // Create the mask, mode1: Laplacian filter Mask
     MaskDialog *maskDialog = new MaskDialog(3, 3, 1, this);
     if (maskDialog->exec() == QDialog::Rejected) return;
 
@@ -832,6 +817,85 @@ void MainWindow::on_actionLaplace_filter_triggered()
     (*curImg).release();
     bufTmp.copyTo((*curImg));
     updateFigures();
+}
+
+//
+// Sharpen the image with Unsharp masking method
+//
+void MainWindow::on_actionUnsharp_Masking_triggered()
+{
+    // Get the gaussian filter
+    UMaskDialog *uMaskDialog = new UMaskDialog(this);
+    if (uMaskDialog->exec() == QDialog::Rejected) return;
+    int size = uMaskDialog->size;
+    double sigma = uMaskDialog->sigma;
+    double *gFilter = new double[size*size];
+    bool timing = uMaskDialog->timing;
+    double K = uMaskDialog->k;
+
+    // Check the filter size
+    if (size % 2 == 0)
+    {
+        msgBox = QMessageBox::warning(this,
+                     tr("Filter size error"),
+                     tr("Filter size must be odd.\n"));
+        return;
+    }
+
+    genGaussianFilter(size, sigma, gFilter);
+
+    // Blur the original image
+    bufTmp.release();
+    if ((*curImg).channels() == 1)
+    {               // For grayscale image
+        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC1);
+    } else{         // For color image
+        bufTmp = Mat::zeros((*curImg).rows, (*curImg).cols, CV_8UC3);
+    }
+
+    if (timing)
+    {
+        const clock_t begin_time = clock();
+        convolve((*curImg), bufTmp, gFilter, size, size);
+        QString msg = "It took " +
+                QString::number((float(clock () - begin_time) / CLOCKS_PER_SEC), 'f', 3) +
+                " seconds for the smoothing operation";
+        msgBox = QMessageBox::information(this, tr("Computation time"), msg);
+    } else {
+        convolve((*curImg), bufTmp, gFilter, size, size);
+    }
+
+    // New image = original image + K * (original image - blurred image)
+    for(int i = 0; i < (*curImg).rows; ++i)
+    {
+        for(int j = 0; j < (*curImg).cols; ++j)
+        {
+            for(int k = 0; k < (*curImg).channels(); ++k)
+            {
+                // Assign the new value to the image buffer on the display
+                bufTmp.data[bufTmp.channels() * (bufTmp.cols*i + j) + k] =
+                        saturate_cast<uchar>(
+                            (1 + K) * ((*curImg).data[(*curImg).channels() * ((*curImg).cols*i + j) + k]) -
+                            K * bufTmp.data[bufTmp.channels() * (bufTmp.cols*i + j) + k]);
+            }
+        }
+    }
+
+    // Update the image label and histogram chart
+    (*curImg).release();
+    bufTmp.copyTo((*curImg));
+    updateFigures();
+}
+
+//
+// Display the image with original size
+//
+void MainWindow::on_actionRender_original_size_image_triggered()
+{
+    // Open dialog without mainwindow as it's parent
+    ImshowDialog *imshowDialog = new ImshowDialog(curImg, fileName);
+    imshowDialog->setModal(false);
+    imshowDialog->show();
 }
 
 //

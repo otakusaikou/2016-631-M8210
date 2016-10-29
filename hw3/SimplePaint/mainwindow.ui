@@ -370,7 +370,8 @@
       <property name="title">
        <string>Sharpening</string>
       </property>
-      <addaction name="actionLaplace_filter"/>
+      <addaction name="actionLaplacian_filter"/>
+      <addaction name="actionUnsharp_Masking"/>
      </widget>
      <widget class="QMenu" name="menuOthers">
       <property name="title">
@@ -390,8 +391,15 @@
     <addaction name="actionHistogram_Equalization"/>
     <addaction name="menuSpatial_filtering_operations"/>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionRender_original_size_image"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuView"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -404,6 +412,7 @@
    <addaction name="actionSave"/>
    <addaction name="actionReset"/>
    <addaction name="actionExit"/>
+   <addaction name="actionRender_original_size_image"/>
    <addaction name="actionConvert_to_GRAY_Type_A"/>
    <addaction name="actionConvert_to_GRAY_Type_B"/>
    <addaction name="actionThreshold"/>
@@ -413,7 +422,8 @@
    <addaction name="actionMedian_Filter"/>
    <addaction name="actionMaxminum_Filter"/>
    <addaction name="actionMinimum_Filter"/>
-   <addaction name="actionLaplace_filter"/>
+   <addaction name="actionLaplacian_filter"/>
+   <addaction name="actionUnsharp_Masking"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -554,12 +564,12 @@
     <string>Gaussian Filter</string>
    </property>
   </action>
-  <action name="actionLaplace_filter">
+  <action name="actionLaplacian_filter">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Laplace Filter</string>
+    <string>Laplacian Filter</string>
    </property>
   </action>
   <action name="actionMedian_Filter">
@@ -596,6 +606,29 @@
    </property>
    <property name="text">
     <string>Minimum Filter</string>
+   </property>
+  </action>
+  <action name="actionUnsharp_Masking">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Unsharp Masking</string>
+   </property>
+  </action>
+  <action name="actionRender_original_size_image">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="myres.qrc">
+     <normaloff>:/Icon/icons/render-image-icon.png</normaloff>:/Icon/icons/render-image-icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Render original size image</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
    </property>
   </action>
  </widget>
