@@ -71,6 +71,12 @@ void MainWindow::on_actionOpen_triggered()
     ui->contrastSlider->setDisabled(false);
     ui->brightnessSlider->setDisabled(false);
 
+    // Enable the resize and grayscale changing function
+    ui->resizeSpinBox->setDisabled(false);
+    ui->resizeButton->setDisabled(false);
+    ui->grayscaleComboBox->setDisabled(false);
+    ui->changeButton->setDisabled(false);
+
     // Initialize the slider and alpha, beta values
     ui->contrastSlider->setValue(50);
     ui->brightnessSlider->setValue(50);
