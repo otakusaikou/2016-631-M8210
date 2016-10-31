@@ -18,21 +18,24 @@ SOURCES += main.cpp\
     maskdialog.cpp \
     gmaskdialog.cpp \
     umaskdialog.cpp \
-    imshowdialog.cpp
+    imshowdialog.cpp \
+    mhedgedialog.cpp
 
 HEADERS  += mainwindow.h \
     masksizedialog.h \
     maskdialog.h \
     gmaskdialog.h \
     umaskdialog.h \
-    imshowdialog.h
+    imshowdialog.h \
+    mhedgedialog.h
 
 FORMS    += mainwindow.ui \
     masksizedialog.ui \
     maskdialog.ui \
     gmaskdialog.ui \
     umaskdialog.ui \
-    imshowdialog.ui
+    imshowdialog.ui \
+    mhedgedialog.ui
 
 # User defined settings
 QT       += charts

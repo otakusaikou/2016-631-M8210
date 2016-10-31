@@ -13,7 +13,7 @@ class ImshowDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ImshowDialog(const cv::Mat *curImg, const QString &fileName, QWidget *parent = 0);
+    explicit ImshowDialog(const cv::Mat &imgSrc, const QString &fileName, QWidget *parent = 0);
     ~ImshowDialog();
 
 private:

@@ -22,6 +22,7 @@
 #include "gmaskdialog.h"
 #include "umaskdialog.h"
 #include "imshowdialog.h"
+#include "mhedgedialog.h"
 
 typedef unsigned char uchar;
 
@@ -39,10 +40,7 @@ public:
 
     QString fileName;
     cv::Mat imgSrc;         // Source image
-    cv::Mat bufRGB;         // Buffer for color image
-    cv::Mat bufGray;        // Buffer for operation involved grayscale image
-    cv::Mat *curImg;        // Pointer to the current image on the display
-    cv::Mat bufTmp;         // Template image for resize and mask operation
+    cv::Mat bufImg;         // Image buffer
     double alpha;           // Contrast parameter
     double beta;            // Brightness parameter
     int msgBox;
@@ -90,6 +88,8 @@ private slots:
 
     void on_actionUnsharp_Masking_triggered();
 
+    void on_actionMarr_Hildreth_Edge_Detector_triggered();
+
     void on_actionRender_original_size_image_triggered();
 
 private:
@@ -101,7 +101,7 @@ private:
 
     int reflect(const int &M, const int &x);
 
-    void convolve(const cv::Mat &imgSrc, cv::Mat &imgDst, const double *mask, const int &maskRows, const int &maskCols);
+    void convolve(const cv::Mat &imgSrc, cv::Mat &imgDst, const double *mask, const int &maskRows, const int &maskCols, const int &depth);
 
     void genGaussianFilter(const int &size, const double &sigma, double *gFilter);
 
@@ -110,6 +110,8 @@ private:
     void max(const cv::Mat &imgSrc, cv::Mat &imgDst, const int &maskRows, const int &maskCols);
 
     void min(const cv::Mat &imgSrc, cv::Mat &imgDst, const int &maskRows, const int &maskCols);
+
+    void zeroCross(const cv::Mat &imgSrc, cv::Mat &imgDst, const double &thres);
 };
 
 #endif // MAINWINDOW_H

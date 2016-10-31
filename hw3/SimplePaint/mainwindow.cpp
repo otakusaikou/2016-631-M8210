@@ -32,6 +32,7 @@ void MainWindow::on_actionOpen_triggered()
         fileName = tempFileName;
 
         // Open image file
+        imgSrc.release();       // Free image memory before reading new image
         imgSrc = imread(fileName.toStdString().data());
         if (!imgSrc.data)
         {
@@ -40,7 +41,8 @@ void MainWindow::on_actionOpen_triggered()
                          tr("Can't open the image file.\n"));
             return;
         }
-    } else {                    // The case with empty file name
+    } else
+    {                    // The case with empty file name
         return;
     }
 
@@ -49,10 +51,7 @@ void MainWindow::on_actionOpen_triggered()
 
     // Copy the source image data to color image buffer
     cvtColor(imgSrc, imgSrc, COLOR_BGR2RGB);
-    imgSrc.copyTo(bufRGB);
-
-    // Set current image pointer to color image buffer
-    curImg = &bufRGB;
+    imgSrc.copyTo(bufImg);
 
     // Update the image label and histogram chart
     updateFigures();
@@ -103,6 +102,9 @@ void MainWindow::on_actionOpen_triggered()
     ui->actionLaplacian_filter->setDisabled(false);
     ui->actionUnsharp_Masking->setDisabled(false);
 
+    // Enable edge detection methods
+    ui->actionMarr_Hildreth_Edge_Detector->setDisabled(false);
+
     // Enable original size image rendering function
     ui->actionRender_original_size_image->setDisabled(false);
 }
@@ -130,29 +132,27 @@ void MainWindow::on_actionConvert_to_GRAY_Type_A_triggered()
     }
 
     // Don't do anything if current image is grayscale image
-    if (curImg->channels() == 1) return;
+    if (bufImg.channels() == 1) return;
 
-    uchar newVal;
-    // Create a new gray image buffer
-    bufGray.release();
-    bufGray = Mat::zeros(bufRGB.rows, bufRGB.cols, CV_8U);
-
-    for (int i = 0; i < bufRGB.rows; ++i)
+    // Create a template image buffer
+    Mat tmpImg = Mat::zeros(bufImg.rows, bufImg.cols, CV_8U);
+    for (int i = 0; i < bufImg.rows; ++i)
     {
-        for (int j = 0; j < bufRGB.cols; ++j)
+        for (int j = 0; j < bufImg.cols; ++j)
         {
             // Compute the new value
-            newVal = (bufRGB.data[bufRGB.channels() * (bufRGB.cols*i + j)]
-                      + bufRGB.data[bufRGB.channels() * (bufRGB.cols*i + j) + 1]
-                      + bufRGB.data[bufRGB.channels() * (bufRGB.cols*i + j) + 2]) / 3.0;
+            uchar newVal = (
+                    bufImg.at<Vec3b>(i, j)[0] +
+                    bufImg.at<Vec3b>(i, j)[1] +
+                    bufImg.at<Vec3b>(i, j)[2]) / 3.0;
 
-            // Assign the new value to the image buffer on the display
-            bufGray.data[bufRGB.cols*i + j] = newVal;
+            // Assign the new value to the template image buffer
+            tmpImg.at<uchar>(i, j) = newVal;
         }
     }
 
-    // Set current image pointer to gray image buffer
-    curImg = &bufGray;
+    // Copy the content of template image to current image buffer
+    tmpImg.copyTo(bufImg);
 
     // Update the image label and histogram chart
     updateFigures();
@@ -180,29 +180,27 @@ void MainWindow::on_actionConvert_to_GRAY_Type_B_triggered()
     }
 
     // Don't do anything if current image is grayscale image
-    if (curImg->channels() == 1) return;
+    if (bufImg.channels() == 1) return;
 
-    uchar newVal;
-    // Create a new gray image buffer
-    bufGray.release();
-    bufGray = Mat::zeros(bufRGB.rows, bufRGB.cols, CV_8U);
-
-    for (int i = 0; i < bufRGB.rows; ++i)
+    // Create a template image buffer
+    Mat tmpImg = Mat::zeros(bufImg.rows, bufImg.cols, CV_8U);
+    for (int i = 0; i < bufImg.rows; ++i)
     {
-        for (int j = 0; j < bufRGB.cols; ++j)
+        for (int j = 0; j < bufImg.cols; ++j)
         {
             // Compute the new value
-            newVal = (0.299*bufRGB.data[bufRGB.channels() * (bufRGB.cols*i + j)]
-                      + 0.587*bufRGB.data[bufRGB.channels() * (bufRGB.cols*i + j) + 1]
-                      + 0.114*bufRGB.data[bufRGB.channels() * (bufRGB.cols*i + j) + 2]);
+            uchar newVal = (
+                    0.299*bufImg.at<Vec3b>(i, j)[0] +
+                    0.587*bufImg.at<Vec3b>(i, j)[1] +
+                    0.114*bufImg.at<Vec3b>(i, j)[2]);
 
-            // Assign the new value to the image buffer on the display
-            bufGray.data[bufRGB.cols*i + j] = newVal;
+            // Assign the new value to the template image buffer
+            tmpImg.at<uchar>(i, j) = newVal;
         }
     }
 
-    // Set current image pointer to gray image buffer
-    curImg = &bufGray;
+    // Copy the content of template image to current image buffer
+    tmpImg.copyTo(bufImg);
 
     // Update the image label and histogram chart
     updateFigures();
@@ -245,7 +243,7 @@ void MainWindow::on_actionSave_triggered()
 
         // Copy the result to the image save buffer
         Mat bufSave;
-        curImg->copyTo(bufSave);
+        bufImg.copyTo(bufSave);
 
         // If current image is color image, convert it from rgb to bgr
         if (bufSave.channels() > 1)
@@ -254,7 +252,8 @@ void MainWindow::on_actionSave_triggered()
         }
 
         imwrite(tempFileName.toStdString(), bufSave);
-    } else {                    // The case with empty file name
+    } else
+    {                    // The case with empty file name
         return;
     }
 }
@@ -273,16 +272,8 @@ void MainWindow::on_actionReset_triggered()
         return;
     }
 
-    // Release memory
-    bufRGB.release();
-    bufGray.release();
-    bufTmp.release();
-
     // Copy the source image data to color image buffer
-    imgSrc.copyTo(bufRGB);
-
-    // Set current image pointer to color image buffer
-    curImg = &bufRGB;
+    imgSrc.copyTo(bufImg);
 
     // Update the image label and histogram chart
     updateFigures();
@@ -319,25 +310,20 @@ void MainWindow::on_actionThreshold_triggered()
         return;
     }
 
-    // Don't do anything if there is no any grayscale image exists
-    if (bufGray.empty()) return;
-
-    for (int i = 0; i < bufGray.rows; ++i)
+    for (int i = 0; i < bufImg.rows; ++i)
     {
-        for (int j = 0; j < bufGray.cols; ++j)
+        for (int j = 0; j < bufImg.cols; ++j)
         {
             // Assign the new value after thresholding
-            if  (bufGray.data[bufGray.cols*i + j] > 127)
+            if (bufImg.at<uchar>(i, j) > 127)
             {
-                bufGray.data[bufGray.cols*i + j] = 255;
-            } else {
-                bufGray.data[bufGray.cols*i + j] = 0;
+                bufImg.at<uchar>(i, j) = 255;
+            } else
+            {
+                bufImg.at<uchar>(i, j) = 0;
             }
         }
     }
-
-    // Set current image pointer to gray image buffer
-    curImg = &bufGray;
 
     // Update the image label and histogram chart
     updateFigures();
@@ -361,17 +347,22 @@ void MainWindow::on_contrastSlider_sliderPressed()
 void MainWindow::on_contrastSlider_sliderReleased()
 {
     // The new_image = alpha * old_image
-    for(int i = 0; i < curImg->rows; ++i)
+    for(int i = 0; i < bufImg.rows; ++i)
     {
-        for(int j = 0; j < curImg->cols; ++j)
+        for(int j = 0; j < bufImg.cols; ++j)
         {
-            for(int k = 0; k < curImg->channels(); ++k)
-            {
-                // Assign the new value to the image buffer on the display
-                curImg->data[curImg->channels() * (curImg->cols*i + j) + k] =
-                        saturate_cast<uchar>(
-                            ((2.0/100) * ui->contrastSlider->value()/alpha) *
-                            (curImg->data[curImg->channels() * (curImg->cols*i + j) + k]));
+            // Assign the new value to the image buffer on the display
+            if (bufImg.channels() == 1)
+            {                           // For grayscale image
+                bufImg.at<uchar>(i, j) = saturate_cast<uchar>(
+                        ((2.0/100) * ui->contrastSlider->value()/alpha) * (bufImg.at<uchar>(i, j)));
+            } else
+            {                           // For color image
+                for(int k = 0; k < bufImg.channels(); ++k)
+                {
+                    bufImg.at<Vec3b>(i, j)[k] = saturate_cast<uchar>(
+                            ((2.0/100) * ui->contrastSlider->value()/alpha) * (bufImg.at<Vec3b>(i, j)[k]));
+                }
             }
         }
     }
@@ -394,17 +385,22 @@ void MainWindow::on_brightnessSlider_sliderPressed()
 void MainWindow::on_brightnessSlider_sliderReleased()
 {
     // The new_image = old_image + beta
-    for(int i = 0; i < curImg->rows; ++i)
+    for(int i = 0; i < bufImg.rows; ++i)
     {
-        for(int j = 0; j < curImg->cols; ++j)
+        for(int j = 0; j < bufImg.cols; ++j)
         {
-            for(int k = 0; k < curImg->channels(); ++k)
-            {
-                // Assign the new value to the image buffer on the display
-                curImg->data[curImg->channels() * (curImg->cols*i + j) + k] =
-                        saturate_cast<uchar>(
-                            curImg->data[curImg->channels() * (curImg->cols*i + j) + k] -
-                            beta + (255.0/100) * ui->brightnessSlider->value() - 127.5);
+            // Assign the new value to the image buffer on the display
+            if (bufImg.channels() == 1)
+            {                           // For grayscale image
+                bufImg.at<uchar>(i, j) = saturate_cast<uchar>(
+                        bufImg.at<uchar>(i, j) - beta + (255.0/100) * ui->brightnessSlider->value() - 127.5);
+            } else
+            {                           // For color image
+                for(int k = 0; k < bufImg.channels(); ++k)
+                {
+                    bufImg.at<Vec3b>(i, j)[k] = saturate_cast<uchar>(
+                            bufImg.at<Vec3b>(i, j)[k] - beta + (255.0/100) * ui->brightnessSlider->value() - 127.5);
+                }
             }
         }
     }
@@ -419,19 +415,20 @@ void MainWindow::on_brightnessSlider_sliderReleased()
 void MainWindow::on_resizeButton_clicked()
 {
     double scale = ui->resizeSpinBox->value();
-    bufTmp.release();
-    if (curImg->channels() == 1)
+    Mat tmpImg;
+    if (bufImg.channels() == 1)
     {                       // For grayscale image
-        bufTmp = Mat::zeros(static_cast<int>(curImg->rows*scale), static_cast<int>(curImg->cols*scale), CV_8UC1);
+        tmpImg = Mat::zeros(static_cast<int>(bufImg.rows*scale), static_cast<int>(bufImg.cols*scale), CV_8UC1);
     } else{                 // For color image
-        bufTmp = Mat::zeros(static_cast<int>(curImg->rows*scale), static_cast<int>(curImg->cols*scale), CV_8UC3);
+        tmpImg = Mat::zeros(static_cast<int>(bufImg.rows*scale), static_cast<int>(bufImg.cols*scale), CV_8UC3);
     }
     // Resample the image
-    resize((*curImg), bufTmp);
+    resize(bufImg, tmpImg);
+
+    // Copy the content of template image to current image buffer
+    tmpImg.copyTo(bufImg);
 
     // Update the image label and histogram chart
-    curImg->release();
-    bufTmp.copyTo((*curImg));
     updateFigures();
 }
 
@@ -443,17 +440,26 @@ void MainWindow::on_changeButton_clicked()
     int scale = pow(2, ui->grayscaleComboBox->count() - (ui->grayscaleComboBox->currentIndex()));
 
     // The new_image = floor(old_image * scale / 256) * (255 / (scale - 1))
-    for(int i = 0; i < curImg->rows; ++i)
+    for(int i = 0; i < bufImg.rows; ++i)
     {
-        for(int j = 0; j < curImg->cols; ++j)
+        for(int j = 0; j < bufImg.cols; ++j)
         {
-            for(int k = 0; k < curImg->channels(); ++k)
-            {
-                // Assign the new value to the image buffer on the display
-                curImg->data[curImg->channels() * (curImg->cols*i + j) + k] =
+            // Assign the new value to the image buffer on the display
+            if (bufImg.channels() == 1)
+            {                           // For grayscale image
+                bufImg.at<uchar>(i, j) =
                          saturate_cast<uchar>(
-                            floor((1.0*scale/256) * (curImg->data[curImg->channels() * (curImg->cols*i + j) + k])) *
+                            floor((1.0*scale/256) * (bufImg.at<uchar>(i, j))) *
                             (255/(scale-1)));
+            } else
+            {                           // For color image
+                for(int k = 0; k < bufImg.channels(); ++k)
+                {
+                    bufImg.at<Vec3b>(i, j)[k] =
+                             saturate_cast<uchar>(
+                                floor((1.0*scale/256) * (bufImg.at<Vec3b>(i, j)[k])) *
+                                (255/(scale-1)));
+                }
             }
         }
     }
@@ -467,39 +473,46 @@ void MainWindow::on_changeButton_clicked()
 //
 void MainWindow::on_actionHistogram_Equalization_triggered()
 {
-    vector<int> hist(256*curImg->channels(), 0);        // Histogram
-    vector<int> cumHist(256*curImg->channels(), 0);     // Cumulative histogram
-    vector<int> lut(256*curImg->channels(), 0);         // Look up table for histogram equalization
-    double scale = 255.0/(curImg->rows*curImg->cols);
+    vector<int> hist(256*bufImg.channels(), 0);        // Histogram
+    vector<int> cumHist(256*bufImg.channels(), 0);     // Cumulative histogram
+    vector<int> lut(256*bufImg.channels(), 0);         // Look up table for histogram equalization
+    double scale = 255.0/(bufImg.rows*bufImg.cols);
 
     // Calculate the histogram
-    for (int i = 0; i < curImg->rows; ++i)
+    for (int i = 0; i < bufImg.rows; ++i)
     {
-        for (int j = 0; j < curImg->cols; ++j)
+        for (int j = 0; j < bufImg.cols; ++j)
         {
-            for (int k = 0; k < curImg->channels(); ++k)
-            {
-                ++hist.at(256*k + curImg->data[curImg->channels() * (curImg->cols*i + j) + k]);
+            if (bufImg.channels() == 1)
+            {                           // For grayscale image
+                ++hist.at(bufImg.at<uchar>(i, j));
+            } else
+            {                           // For color image
+                for(int k = 0; k < bufImg.channels(); ++k)
+                {
+                    ++hist.at(256*k + bufImg.at<Vec3b>(i, j)[k]);
+                }
             }
         }
     }
 
     // Calculate the cumulative histogram
-    for (int k = 0; k < curImg->channels(); ++k)
+    for (int k = 0; k < bufImg.channels(); ++k)
     {
         for (int i = 0; i < 256; ++i)
         {
             if (i == 0)
             {
                 cumHist.at(256*k + i) = hist.at(256*k + i);
-            } else {
+            } else
+            {
                 cumHist.at(256*k + i) = hist.at(256*k + i) + cumHist.at(256*k + i - 1);
             }
         }
     }
 
     // Generate the look up table
-    for (int k = 0; k < curImg->channels(); ++k)
+    for (int k = 0; k < bufImg.channels(); ++k)
     {
         for (int i = 0; i < 256; ++i)
         {
@@ -508,14 +521,19 @@ void MainWindow::on_actionHistogram_Equalization_triggered()
     }
 
     // Equalize the image
-    for (int i = 0; i < curImg->rows; ++i)
+    for (int i = 0; i < bufImg.rows; ++i)
     {
-        for (int j = 0; j < curImg->cols; ++j)
+        for (int j = 0; j < bufImg.cols; ++j)
         {
-            for (int k = 0; k < curImg->channels(); ++k)
-            {
-                curImg->data[curImg->channels() * (curImg->cols*i + j) + k] =
-                    lut.at(256*k + curImg->data[curImg->channels() * (curImg->cols*i + j) + k]);
+            if (bufImg.channels() == 1)
+            {                           // For grayscale image
+                bufImg.at<uchar>(i, j) = lut.at(bufImg.at<uchar>(i, j));
+            } else
+            {                           // For color image
+                for(int k = 0; k < bufImg.channels(); ++k)
+                {
+                    bufImg.at<Vec3b>(i, j)[k] = lut.at(256*k + bufImg.at<Vec3b>(i, j)[k]);
+                }
             }
         }
     }
@@ -534,6 +552,7 @@ void MainWindow::on_actionAveraging_Filter_triggered()
     if (maskSizeDialog->exec() == QDialog::Rejected) return;
     int maskRows = maskSizeDialog->rows;
     int maskCols = maskSizeDialog->cols;
+    bool timing = maskSizeDialog->timing;
 
     // Check the mask size
     if (maskRows % 2 == 0 || maskCols % 2 == 0)
@@ -544,11 +563,13 @@ void MainWindow::on_actionAveraging_Filter_triggered()
         return;
     }
 
-    bool timing = maskSizeDialog->timing;
-
     // Create the mask, mode0: averaging filter Mask
     MaskDialog *maskDialog = new MaskDialog(maskRows, maskCols, 0, this);
     if (maskDialog->exec() == QDialog::Rejected) return;
+
+    // Measure the computation time
+    clock_t begin_time;
+    if (timing) begin_time = clock();   // Timing start
 
     // Create mask array
     QStandardItemModel *model = maskDialog->model;
@@ -562,31 +583,23 @@ void MainWindow::on_actionAveraging_Filter_triggered()
         }
     }
 
-    // Generate new image
-    bufTmp.release();
-    if (curImg->channels() == 1)
-    {               // For grayscale image
-        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC1);
-    } else{         // For color image
-        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC3);
-    }
+    // Create a template image buffer
+    Mat tmpImg = Mat::zeros(bufImg.rows, bufImg.cols, bufImg.type());
 
-    // Measure the computation time
-    if (timing)
+    convolve(bufImg, tmpImg, mask, maskRows, maskCols, CV_8U);
+
+    if (timing)                         // Timing end
     {
-        const clock_t begin_time = clock();
-        convolve((*curImg), bufTmp, mask, maskRows, maskCols);
         QString msg = "It took " +
                 QString::number((float(clock () - begin_time) / CLOCKS_PER_SEC), 'f', 3) +
-                " seconds for the smoothing operation";
+                " seconds for the averaging filter operation";
         msgBox = QMessageBox::information(this, tr("Computation time"), msg);
-    } else {
-        convolve((*curImg), bufTmp, mask, maskRows, maskCols);
     }
 
+    // Copy the content of template image to current image buffer
+    tmpImg.copyTo(bufImg);
+
     // Update the image label and histogram chart
-    curImg->release();
-    bufTmp.copyTo((*curImg));
     updateFigures();
 }
 
@@ -612,32 +625,29 @@ void MainWindow::on_actionGaussian_Filter_triggered()
         return;
     }
 
+    // Measure the computation time
+    clock_t begin_time = 0;
+    if (timing) begin_time = clock();   // Timing start
+
     genGaussianFilter(size, sigma, gFilter);
 
-    // Generate new image
-    bufTmp.release();
-    if (curImg->channels() == 1)
-    {               // For grayscale image
-        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC1);
-    } else{         // For color image
-        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC3);
-    }
+    // Create a template image buffer
+    Mat tmpImg = Mat::zeros(bufImg.rows, bufImg.cols, bufImg.type());
 
-    if (timing)
+    convolve(bufImg, tmpImg, gFilter, size, size, CV_8U);
+
+    if (timing)                         // Timing end
     {
-        const clock_t begin_time = clock();
-        convolve((*curImg), bufTmp, gFilter, size, size);
         QString msg = "It took " +
                 QString::number((float(clock () - begin_time) / CLOCKS_PER_SEC), 'f', 3) +
-                " seconds for the smoothing operation";
+                " seconds for the Gaussian image blurring";
         msgBox = QMessageBox::information(this, tr("Computation time"), msg);
-    } else {
-        convolve((*curImg), bufTmp, gFilter, size, size);
     }
 
+    // Copy the content of template image to current image buffer
+    tmpImg.copyTo(bufImg);
+
     // Update the image label and histogram chart
-    curImg->release();
-    bufTmp.copyTo((*curImg));
     updateFigures();
 }
 
@@ -662,31 +672,27 @@ void MainWindow::on_actionMedian_Filter_triggered()
         return;
     }
 
-    // Generate new image
-    bufTmp.release();
-    if (curImg->channels() == 1)
-    {               // For grayscale image
-        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC1);
-    } else{         // For color image
-        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC3);
-    }
-
     // Measure the computation time
-    if (timing)
+    clock_t begin_time = 0;
+    if (timing) begin_time = clock();   // Timing start
+
+    // Create a template image buffer
+    Mat tmpImg = Mat::zeros(bufImg.rows, bufImg.cols, bufImg.type());
+
+    median(bufImg, tmpImg, maskRows, maskCols);
+
+    if (timing)                         // Timing end
     {
-        const clock_t begin_time = clock();
-        median((*curImg), bufTmp, maskRows, maskCols);
         QString msg = "It took " +
                 QString::number((float(clock () - begin_time) / CLOCKS_PER_SEC), 'f', 3) +
-                " seconds for the smoothing operation";
+                " seconds for the median filter operation";
         msgBox = QMessageBox::information(this, tr("Computation time"), msg);
-    } else {
-        median((*curImg), bufTmp, maskRows, maskCols);
     }
 
+    // Copy the content of template image to current image buffer
+    tmpImg.copyTo(bufImg);
+
     // Update the image label and histogram chart
-    curImg->release();
-    bufTmp.copyTo((*curImg));
     updateFigures();
 }
 
@@ -711,31 +717,27 @@ void MainWindow::on_actionMaxminum_Filter_triggered()
         return;
     }
 
-    // Generate new image
-    bufTmp.release();
-    if (curImg->channels() == 1)
-    {               // For grayscale image
-        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC1);
-    } else{         // For color image
-        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC3);
-    }
-
     // Measure the computation time
-    if (timing)
+    clock_t begin_time = 0;
+    if (timing) begin_time = clock();   // Timing start
+
+    // Create a template image buffer
+    Mat tmpImg = Mat::zeros(bufImg.rows, bufImg.cols, bufImg.type());
+
+    max(bufImg, tmpImg, maskRows, maskCols);
+
+    if (timing)                         // Timing end
     {
-        const clock_t begin_time = clock();
-        max((*curImg), bufTmp, maskRows, maskCols);
         QString msg = "It took " +
                 QString::number((float(clock () - begin_time) / CLOCKS_PER_SEC), 'f', 3) +
-                " seconds for the smoothing operation";
+                " seconds for the maximum filter operation";
         msgBox = QMessageBox::information(this, tr("Computation time"), msg);
-    } else {
-        max((*curImg), bufTmp, maskRows, maskCols);
     }
 
+    // Copy the content of template image to current image buffer
+    tmpImg.copyTo(bufImg);
+
     // Update the image label and histogram chart
-    curImg->release();
-    bufTmp.copyTo((*curImg));
     updateFigures();
 }
 
@@ -760,31 +762,27 @@ void MainWindow::on_actionMinimum_Filter_triggered()
         return;
     }
 
-    // Generate new image
-    bufTmp.release();
-    if (curImg->channels() == 1)
-    {               // For grayscale image
-        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC1);
-    } else{         // For color image
-        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC3);
-    }
-
     // Measure the computation time
-    if (timing)
+    clock_t begin_time = 0;
+    if (timing) begin_time = clock();   // Timing start
+
+    // Create a template image buffer
+    Mat tmpImg = Mat::zeros(bufImg.rows, bufImg.cols, bufImg.type());
+
+    min(bufImg, tmpImg, maskRows, maskCols);
+
+    if (timing)                         // Timing end
     {
-        const clock_t begin_time = clock();
-        min((*curImg), bufTmp, maskRows, maskCols);
         QString msg = "It took " +
                 QString::number((float(clock () - begin_time) / CLOCKS_PER_SEC), 'f', 3) +
-                " seconds for the smoothing operation";
+                " seconds for the minimum filter operation";
         msgBox = QMessageBox::information(this, tr("Computation time"), msg);
-    } else {
-        min((*curImg), bufTmp, maskRows, maskCols);
     }
 
+    // Copy the content of template image to current image buffer
+    tmpImg.copyTo(bufImg);
+
     // Update the image label and histogram chart
-    curImg->release();
-    bufTmp.copyTo((*curImg));
     updateFigures();
 }
 
@@ -809,19 +807,15 @@ void MainWindow::on_actionLaplacian_filter_triggered()
         }
     }
 
-    // Generate new image
-    bufTmp.release();
-    if (curImg->channels() == 1)
-    {               // For grayscale image
-        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC1);
-    } else{         // For color image
-        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC3);
-    }
-    convolve((*curImg), bufTmp, mask, 3, 3);
+    // Create a template image buffer
+    Mat tmpImg = Mat::zeros(bufImg.rows, bufImg.cols, bufImg.type());
+
+    convolve(bufImg, tmpImg, mask, 3, 3, CV_8U);
+
+    // Copy the content of template image to current image buffer
+    tmpImg.copyTo(bufImg);
 
     // Update the image label and histogram chart
-    curImg->release();
-    bufTmp.copyTo((*curImg));
     updateFigures();
 }
 
@@ -839,7 +833,7 @@ void MainWindow::on_actionUnsharp_Masking_triggered()
     bool timing = uMaskDialog->timing;
     double K = uMaskDialog->k;
 
-    // Check the filter size
+    // Check the mask size
     if (size % 2 == 0)
     {
         msgBox = QMessageBox::warning(this,
@@ -848,49 +842,132 @@ void MainWindow::on_actionUnsharp_Masking_triggered()
         return;
     }
 
-    genGaussianFilter(size, sigma, gFilter);
+    // Measure the computation time
+    clock_t begin_time;
+    if (timing) begin_time = clock();   // Timing start
 
     // Blur the original image
-    bufTmp.release();
-    if (curImg->channels() == 1)
-    {               // For grayscale image
-        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC1);
-    } else{         // For color image
-        bufTmp = Mat::zeros(curImg->rows, curImg->cols, CV_8UC3);
-    }
+    genGaussianFilter(size, sigma, gFilter);
 
-    if (timing)
-    {
-        const clock_t begin_time = clock();
-        convolve((*curImg), bufTmp, gFilter, size, size);
-        QString msg = "It took " +
-                QString::number((float(clock () - begin_time) / CLOCKS_PER_SEC), 'f', 3) +
-                " seconds for the smoothing operation";
-        msgBox = QMessageBox::information(this, tr("Computation time"), msg);
-    } else {
-        convolve((*curImg), bufTmp, gFilter, size, size);
-    }
+    // Create a template image buffer
+    Mat tmpImg = Mat::zeros(bufImg.rows, bufImg.cols, bufImg.type());
+
+    convolve(bufImg, tmpImg, gFilter, size, size, CV_8U);
 
     // New image = original image + K * (original image - blurred image)
-    for(int i = 0; i < curImg->rows; ++i)
+    for(int i = 0; i < bufImg.rows; ++i)
     {
-        for(int j = 0; j < curImg->cols; ++j)
+        for(int j = 0; j < bufImg.cols; ++j)
         {
-            for(int k = 0; k < curImg->channels(); ++k)
-            {
-                // Assign the new value to the image buffer on the display
-                bufTmp.data[bufTmp.channels() * (bufTmp.cols*i + j) + k] =
+            if (bufImg.channels() == 1)
+            {                           // For grayscale image
+                tmpImg.at<uchar>(i, j) =
                         saturate_cast<uchar>(
-                            (1 + K) * (curImg->data[curImg->channels() * (curImg->cols*i + j) + k]) -
-                            K * bufTmp.data[bufTmp.channels() * (bufTmp.cols*i + j) + k]);
+                            (1 + K) * (bufImg.at<uchar>(i, j)) -
+                            K * (tmpImg.at<uchar>(i, j)));
+            } else
+            {                           // For color image
+                for(int k = 0; k < bufImg.channels(); ++k)
+                {
+                    tmpImg.at<Vec3b>(i, j)[k] =
+                            saturate_cast<uchar>(
+                                (1 + K) * (bufImg.at<Vec3b>(i, j)[k]) -
+                                K * (tmpImg.at<Vec3b>(i, j)[k]));
+                }
             }
         }
     }
 
+    if (timing)                         // Timing end
+    {
+        QString msg = "It took " +
+                QString::number((float(clock () - begin_time) / CLOCKS_PER_SEC), 'f', 3) +
+                " seconds for the unsharp masking";
+        msgBox = QMessageBox::information(this, tr("Computation time"), msg);
+    }
+
+    // Copy the content of template image to current image buffer
+    tmpImg.copyTo(bufImg);
+
     // Update the image label and histogram chart
-    curImg->release();
-    bufTmp.copyTo((*curImg));
     updateFigures();
+}
+
+//
+// Detect the edge with Marr-Hildreth method
+//
+void MainWindow::on_actionMarr_Hildreth_Edge_Detector_triggered()
+{
+    // Get parameters of Marr-hildreth edge detector
+    MHEdgeDialog *mHEdgeDialog = new MHEdgeDialog(this);
+    if (mHEdgeDialog->exec() == QDialog::Rejected) return;
+    int size = mHEdgeDialog->size;
+    double sigma = mHEdgeDialog->sigma;
+    double *gFilter = new double[size*size];
+    double thres = mHEdgeDialog->thres;
+    bool timing = mHEdgeDialog->timing;
+
+    // Check the mask size
+    if (size % 2 == 0)
+    {
+        msgBox = QMessageBox::warning(this,
+                     tr("Filter size error"),
+                     tr("Filter size must be odd.\n"));
+        return;
+    }
+
+    // Measure the computation time
+    clock_t begin_time = 0;
+    if (timing) begin_time = clock();   // Timing start
+
+    // If current image is color image, convert it to grayscale image
+    if (bufImg.channels() == 3) cvtColor(bufImg, bufImg, COLOR_RGB2GRAY);
+
+    // Blur the original image
+    genGaussianFilter(size, sigma, gFilter);
+
+    // Create a template image buffer
+    Mat tmpImg = Mat::zeros(bufImg.rows, bufImg.cols, bufImg.type());
+
+    convolve(bufImg, tmpImg, gFilter, size, size, CV_8U);
+    tmpImg.copyTo(bufImg);
+
+    // Compute the Laplacian of the Gaussian blurred image (LoG)
+    tmpImg = Mat::zeros(bufImg.rows, bufImg.cols, CV_16S);
+    QStandardItemModel *model = mHEdgeDialog->model;
+    double *mask = new double[9];
+    for (int i = 0; i < 3; ++i)
+    {
+        for (int j = 0; j < 3; ++j)
+        {
+            mask[3*i + j] = (model->index(i, j).data().toInt());
+        }
+    }
+
+    convolve(bufImg, tmpImg, mask, 3, 3, CV_16S);
+    tmpImg.copyTo(bufImg);
+
+    // Find the zero crossing points in the image
+    tmpImg = Mat::zeros(bufImg.rows, bufImg.cols, CV_8U);
+    zeroCross(bufImg, tmpImg, thres);
+
+    if (timing)                         // Timing end
+    {
+        QString msg = "It took " +
+                QString::number((float(clock () - begin_time) / CLOCKS_PER_SEC), 'f', 3) +
+                " seconds for the Marr-Hildreth edge detection";
+        msgBox = QMessageBox::information(this, tr("Computation time"), msg);
+    }
+
+    // Copy the content of template image to current image buffer
+    tmpImg.copyTo(bufImg);
+
+    // Update the image label and histogram chart
+    updateFigures();
+
+    // Disable the grayscale conversion function
+    ui->actionConvert_to_GRAY_Type_A->setDisabled(true);
+    ui->actionConvert_to_GRAY_Type_B->setDisabled(true);
 }
 
 //
@@ -899,7 +976,7 @@ void MainWindow::on_actionUnsharp_Masking_triggered()
 void MainWindow::on_actionRender_original_size_image_triggered()
 {
     // Open dialog without mainwindow as it's parent
-    ImshowDialog *imshowDialog = new ImshowDialog(curImg, fileName);
+    ImshowDialog *imshowDialog = new ImshowDialog(bufImg, fileName);
     imshowDialog->setModal(false);
     imshowDialog->show();
 }
@@ -910,26 +987,27 @@ void MainWindow::on_actionRender_original_size_image_triggered()
 void MainWindow::updateFigures()
 {
     QImage QImg;
-    vector<int> hist(256*curImg->channels(), 0);        // Histogram
+    vector<int> hist(256*bufImg.channels(), 0);        // Histogram
 
     // Conver opencv image matrix to QImage object
-    if (curImg->channels() == 1)
-    {                       // For grayscale image
-        QImg = QImage((const uchar*) (curImg->data),
-                            curImg->cols, curImg->rows, curImg->step1(), QImage::Format_Grayscale8);
-    } else {                // For color image
-        QImg = QImage((const uchar*) (curImg->data),
-                            curImg->cols, curImg->rows, curImg->step1(), QImage::Format_RGB888);
+    if (bufImg.channels() == 1)
+    {                   // For grayscale image
+        QImg = QImage((const uchar*) (bufImg.data),
+                            bufImg.cols, bufImg.rows, bufImg.step1(), QImage::Format_Grayscale8);
+    } else
+    {                   // For color image
+        QImg = QImage((const uchar*) (bufImg.data),
+                            bufImg.cols, bufImg.rows, bufImg.step1(), QImage::Format_RGB888);
     }
 
     // Calculate histogram
-    for (int i = 0; i < curImg->rows; ++i)
+    for (int i = 0; i < bufImg.rows; ++i)
     {
-        for (int j = 0; j < curImg->cols; ++j)
+        for (int j = 0; j < bufImg.cols; ++j)
         {
-            for (int k = 0; k < curImg->channels(); ++k)
+            for (int k = 0; k < bufImg.channels(); ++k)
             {
-                ++hist.at(256*k + curImg->data[curImg->channels() * (curImg->cols*i + j) + k]);
+                ++hist.at(256*k + bufImg.at<Vec3b>(i, j)[k]);
             }
         }
     }
@@ -950,7 +1028,7 @@ void MainWindow::updateFigures()
     QBarSet *set;
     QBarSeries *series = new QBarSeries();
     QColor colorArray[3] = {Qt::red, Qt::green, Qt::blue};
-    for (int k = 0; k < curImg->channels(); ++k)
+    for (int k = 0; k < bufImg.channels(); ++k)
     {
         set = new QBarSet("Histogram");
         for(int i = 0; i < 256; ++i)
@@ -998,10 +1076,6 @@ void MainWindow::resize(const Mat &imgSrc, Mat &imgDst)
     uchar Ib;
     uchar Ic;
     uchar Id;
-    double wa;
-    double wb;
-    double wc;
-    double wd;
     double x;
     double y;
     double scaleX = 1.0*imgSrc.cols/imgDst.cols;
@@ -1011,8 +1085,8 @@ void MainWindow::resize(const Mat &imgSrc, Mat &imgDst)
     {
         for (int j = 0; j < imgDst.cols; ++j)
         {
-            for (int k = 0; k < imgDst.channels(); ++k)
-            {
+            if (bufImg.channels() == 1)
+            {                           // For grayscale image
                 x = j*scaleX;
                 y = i*scaleY;
                 // Get coordinates of nearest four points
@@ -1029,24 +1103,73 @@ void MainWindow::resize(const Mat &imgSrc, Mat &imgDst)
                 if (y1 >= (imgSrc.rows - 1)) y1 = (imgSrc.rows - 1);
 
                 // Get intensity of nearest four points
-                Ia = imgSrc.data[imgSrc.channels() * (imgSrc.cols*y0 + x0) + k];      // Upper left corner
-                Ib = imgSrc.data[imgSrc.channels() * (imgSrc.cols*y1 + x0) + k];      // Lower left corner
-                Ic = imgSrc.data[imgSrc.channels() * (imgSrc.cols*y0 + x1) + k];      // Upper right corner
-                Id = imgSrc.data[imgSrc.channels() * (imgSrc.cols*y1 + x1) + k];      // Lower right corner
-
-                // Compute the weight of four points
-                wa = (x1 - x)*(y1 - y);
-                wb = (x1 - x)*(y - y0);
-                wc = (x - x0)*(y1 - y);
-                wd = (x - x0)*(y - y0);
+                Ia = imgSrc.at<uchar>(y0, x0);      // Upper left corner
+                Ib = imgSrc.at<uchar>(y1, x0);      // Lower left corner
+                Ic = imgSrc.at<uchar>(y0, x1);      // Upper right corner
+                Id = imgSrc.at<uchar>(y1, x1);      // Lower right corner
 
                 // Assign values to target image
-                if (wa + wb + wc + wd == 0)
+                if (x0 == x1 && y0 == y1)
                 {
-                    imgDst.data[imgDst.channels() * (imgDst.cols*i + j) + k] = Ia;
-                } else {
-                    imgDst.data[imgDst.channels() * (imgDst.cols*i + j) + k] =
-                            (wa*Ia + wb*Ib + wc*Ic + wd*Id);
+                    imgDst.at<uchar>(i, j) = Ia;
+                } else if (x0 == x1 && y0 != y1)
+                {
+                    imgDst.at<uchar>(i, j) = ((y1 - y)*Ia + (y - y0)*Ib);
+                } else if (x0 != x1 && y0 == y1)
+                {
+                    imgDst.at<uchar>(i, j) = ((x1 - x)*Ia + (x - x0)*Ic);
+                } else if (x0 != x1 && y0 != y1)
+                {
+                    imgDst.at<uchar>(i, j) = (
+                                (x1 - x)*(y1 - y)*Ia +
+                                (x1 - x)*(y - y0)*Ib +
+                                (x - x0)*(y1 - y)*Ic +
+                                (x - x0)*(y - y0)*Id);
+                }
+
+            } else
+            {                           // For color image
+                for (int k = 0; k < imgDst.channels(); ++k)
+                {
+                    x = j*scaleX;
+                    y = i*scaleY;
+                    // Get coordinates of nearest four points
+                    x0 = cvFloor(x);
+                    if (x0 > (imgSrc.cols - 1)) x0 = (imgSrc.cols - 1);
+
+                    x1 = x0 + 1;
+                    if (x1 >= (imgSrc.cols - 1)) x1 = (imgSrc.cols - 1);
+
+                    y0 = cvFloor(y);
+                    if (y0 >= (imgSrc.rows - 1)) y0 = (imgSrc.rows - 1);
+
+                    y1 = y0 + 1;
+                    if (y1 >= (imgSrc.rows - 1)) y1 = (imgSrc.rows - 1);
+
+                    // Get intensity of nearest four points
+                    Ia = imgSrc.at<Vec3b>(y0, x0)[k];      // Upper left corner
+                    Ib = imgSrc.at<Vec3b>(y1, x0)[k];      // Lower left corner
+                    Ic = imgSrc.at<Vec3b>(y0, x1)[k];      // Upper right corner
+                    Id = imgSrc.at<Vec3b>(y1, x1)[k];      // Lower right corner
+
+                    // Assign values to target image
+                    if (x0 == x1 && y0 == y1)
+                    {
+                        imgDst.at<Vec3b>(i, j)[k] = Ia;
+                    } else if (x0 == x1 && y0 != y1)
+                    {
+                        imgDst.at<Vec3b>(i, j)[k] = ((y1 - y)*Ia + (y - y0)*Ib);
+                    } else if (x0 != x1 && y0 == y1)
+                    {
+                        imgDst.at<Vec3b>(i, j)[k] = ((x1 - x)*Ia + (x - x0)*Ic);
+                    } else if (x0 != x1 && y0 != y1)
+                    {
+                        imgDst.at<Vec3b>(i, j)[k] = (
+                                    (x1 - x)*(y1 - y)*Ia +
+                                    (x1 - x)*(y - y0)*Ib +
+                                    (x - x0)*(y1 - y)*Ic +
+                                    (x - x0)*(y - y0)*Id);
+                    }
                 }
             }
         }
@@ -1073,7 +1196,7 @@ int MainWindow::reflect(const int &M, const int &x)
 //
 // Perform 2-dimensional convolution
 //
-void MainWindow::convolve(const Mat &imgSrc, Mat &imgDst, const double *mask, const int &maskRows, const int &maskCols)
+void MainWindow::convolve(const Mat &imgSrc, Mat &imgDst, const double *mask, const int &maskRows, const int &maskCols, const int &depth)
 {
     double newVal;      // The new value
     int r1;             // The pixel index emcompassed by the mask
@@ -1083,9 +1206,9 @@ void MainWindow::convolve(const Mat &imgSrc, Mat &imgDst, const double *mask, co
     {
         for (int j = 0; j < imgSrc.cols; ++j)
         {
-            for (int k = 0; k < imgSrc.channels(); ++k)
-            {
-                // Traverse all the coefficients in the mask
+            // Traverse all the coefficients in the mask
+            if (bufImg.channels() == 1)
+            {                           // For grayscale image
                 newVal = 0.0;
                 for (int ii = -(maskRows/2); ii <= (maskRows/2); ++ii)
                 {
@@ -1093,12 +1216,41 @@ void MainWindow::convolve(const Mat &imgSrc, Mat &imgDst, const double *mask, co
                     {
                         r1 = reflect(imgSrc.rows, i - ii);
                         c1 = reflect(imgSrc.cols, j - jj);
-                        newVal += mask[(maskCols*(ii + (maskRows/2)) + (jj + (maskCols/2)))] *
-                                imgSrc.data[imgSrc.channels() * (imgSrc.cols*r1 + c1) + k];
+                        newVal += mask[(maskCols*(ii + (maskRows/2)) + (jj + (maskCols/2)))] * imgSrc.at<uchar>(r1, c1);
                     }
                 }
-                imgDst.data[imgDst.channels() * (imgDst.cols*i + j) + k] =
-                        saturate_cast<uchar>(newVal);
+
+                if (depth == CV_8U)
+                {
+                    imgDst.at<uchar>(i, j) = saturate_cast<uchar>(newVal);
+                } else if (depth == CV_16S)
+                {
+                    imgDst.at<short>(i, j) = saturate_cast<short>(newVal);
+                }
+            } else
+            {                           // For color image
+                for (int k = 0; k < imgSrc.channels(); ++k)
+                {
+                    // Traverse all the coefficients in the mask
+                    newVal = 0.0;
+                    for (int ii = -(maskRows/2); ii <= (maskRows/2); ++ii)
+                    {
+                        for (int jj = -(maskCols/2); jj <= (maskCols/2); ++jj)
+                        {
+                            r1 = reflect(imgSrc.rows, i - ii);
+                            c1 = reflect(imgSrc.cols, j - jj);
+                            newVal += mask[(maskCols*(ii + (maskRows/2)) + (jj + (maskCols/2)))] * imgSrc.at<Vec3b>(r1, c1)[k];
+                        }
+                    }
+
+                    if (depth == CV_8U)
+                    {
+                        imgDst.at<Vec3b>(i, j)[k] = saturate_cast<uchar>(newVal);
+                    } else if (depth == CV_16S)
+                    {
+                        imgDst.at<Vec3b>(i, j)[k] = saturate_cast<short>(newVal);
+                    }
+                }
             }
         }
     }
@@ -1144,25 +1296,44 @@ void MainWindow::median(const Mat &imgSrc, Mat &imgDst, const int &maskRows, con
     {
         for (int j = 0; j < imgSrc.cols; ++j)
         {
-            for (int k = 0; k < imgSrc.channels(); ++k)
-            {
-                // Traverse all the values in the mask
-                vector<uchar> valVec;      // Vector for finding the median
+            // Traverse all the coefficients in the mask
+            if (bufImg.channels() == 1)
+            {                           // For grayscale image
+                vector<uchar> valVec;       // Vector for finding the median
                 for (int ii = -(maskRows/2); ii <= (maskRows/2); ++ii)
                 {
                     for (int jj = -(maskCols/2); jj <= (maskCols/2); ++jj)
                     {
                         r1 = reflect(imgSrc.rows, i - ii);
                         c1 = reflect(imgSrc.cols, j - jj);
-                        valVec.push_back(imgSrc.data[imgSrc.channels() * (imgSrc.cols*r1 + c1) + k]);
+                        valVec.push_back(imgSrc.at<uchar>(r1, c1));
                     }
 
                 }
 
                 // Find the median
                 sort(valVec.begin(), valVec.end());
-                imgDst.data[imgDst.channels() * (imgDst.cols*i + j) + k] =
-                        saturate_cast<uchar>(valVec[valVec.size() / 2]);
+                imgDst.at<uchar>(i, j) = saturate_cast<uchar>(valVec[valVec.size() / 2]);
+            } else
+            {                           // For color image
+                for (int k = 0; k < imgSrc.channels(); ++k)
+                {
+                    vector<uchar> valVec;       // Vector for finding the median
+                    for (int ii = -(maskRows/2); ii <= (maskRows/2); ++ii)
+                    {
+                        for (int jj = -(maskCols/2); jj <= (maskCols/2); ++jj)
+                        {
+                            r1 = reflect(imgSrc.rows, i - ii);
+                            c1 = reflect(imgSrc.cols, j - jj);
+                            valVec.push_back(imgSrc.at<Vec3b>(r1, c1)[k]);
+                        }
+
+                    }
+
+                    // Find the median
+                    sort(valVec.begin(), valVec.end());
+                    imgDst.at<Vec3b>(i, j)[k] = saturate_cast<uchar>(valVec[valVec.size() / 2]);
+                }
             }
         }
     }
@@ -1173,7 +1344,7 @@ void MainWindow::median(const Mat &imgSrc, Mat &imgDst, const int &maskRows, con
 //
 void MainWindow::max(const Mat &imgSrc, Mat &imgDst, const int &maskRows, const int &maskCols)
 {
-    uchar newVal;      // The new value
+    uchar newVal;       // The new value
     int r1;             // The pixel index emcompassed by the mask
     int c1;
     // Traverse all the pixels in source image
@@ -1181,9 +1352,9 @@ void MainWindow::max(const Mat &imgSrc, Mat &imgDst, const int &maskRows, const 
     {
         for (int j = 0; j < imgSrc.cols; ++j)
         {
-            for (int k = 0; k < imgSrc.channels(); ++k)
-            {
-                // Traverse all the coefficients in the mask
+            // Traverse all the elements in the mask
+            if (bufImg.channels() == 1)
+            {                           // For grayscale image
                 newVal = 0;
                 for (int ii = -(maskRows/2); ii <= (maskRows/2); ++ii)
                 {
@@ -1191,14 +1362,32 @@ void MainWindow::max(const Mat &imgSrc, Mat &imgDst, const int &maskRows, const 
                     {
                         r1 = reflect(imgSrc.rows, i - ii);
                         c1 = reflect(imgSrc.cols, j - jj);
-                        if (imgSrc.data[imgSrc.channels() * (imgSrc.cols*r1 + c1) + k] > newVal)
+                        if (imgSrc.at<uchar>(r1, c1) > newVal)
                         {
-                            newVal = imgSrc.data[imgSrc.channels() * (imgSrc.cols*r1 + c1) + k];
+                            newVal = imgSrc.at<uchar>(r1, c1);
                         }
                     }
                 }
-                imgDst.data[imgDst.channels() * (imgDst.cols*i + j) + k] =
-                        saturate_cast<uchar>(newVal);
+                imgDst.at<uchar>(i, j) = saturate_cast<uchar>(newVal);
+            } else
+            {                           // For color image
+                for (int k = 0; k < imgSrc.channels(); ++k)
+                {
+                    newVal = 0;
+                    for (int ii = -(maskRows/2); ii <= (maskRows/2); ++ii)
+                    {
+                        for (int jj = -(maskCols/2); jj <= (maskCols/2); ++jj)
+                        {
+                            r1 = reflect(imgSrc.rows, i - ii);
+                            c1 = reflect(imgSrc.cols, j - jj);
+                            if (imgSrc.at<Vec3b>(r1, c1)[k] > newVal)
+                            {
+                                newVal = imgSrc.at<Vec3b>(r1, c1)[k];
+                            }
+                        }
+                    }
+                    imgDst.at<Vec3b>(i, j)[k] = saturate_cast<uchar>(newVal);
+                }
             }
         }
     }
@@ -1209,7 +1398,7 @@ void MainWindow::max(const Mat &imgSrc, Mat &imgDst, const int &maskRows, const 
 //
 void MainWindow::min(const Mat &imgSrc, Mat &imgDst, const int &maskRows, const int &maskCols)
 {
-    uchar newVal;      // The new value
+    uchar newVal;       // The new value
     int r1;             // The pixel index emcompassed by the mask
     int c1;
     // Traverse all the pixels in source image
@@ -1217,9 +1406,9 @@ void MainWindow::min(const Mat &imgSrc, Mat &imgDst, const int &maskRows, const 
     {
         for (int j = 0; j < imgSrc.cols; ++j)
         {
-            for (int k = 0; k < imgSrc.channels(); ++k)
-            {
-                // Traverse all the coefficients in the mask
+            // Traverse all the elements in the mask
+            if (bufImg.channels() == 1)
+            {                           // For grayscale image
                 newVal = 255;
                 for (int ii = -(maskRows/2); ii <= (maskRows/2); ++ii)
                 {
@@ -1227,14 +1416,105 @@ void MainWindow::min(const Mat &imgSrc, Mat &imgDst, const int &maskRows, const 
                     {
                         r1 = reflect(imgSrc.rows, i - ii);
                         c1 = reflect(imgSrc.cols, j - jj);
-                        if (imgSrc.data[imgSrc.channels() * (imgSrc.cols*r1 + c1) + k] < newVal)
+                        if (imgSrc.at<uchar>(r1, c1) < newVal)
                         {
-                            newVal = imgSrc.data[imgSrc.channels() * (imgSrc.cols*r1 + c1) + k];
+                            newVal = imgSrc.at<uchar>(r1, c1);
                         }
                     }
                 }
-                imgDst.data[imgDst.channels() * (imgDst.cols*i + j) + k] =
-                        saturate_cast<uchar>(newVal);
+                imgDst.at<uchar>(i, j) = saturate_cast<uchar>(newVal);
+            } else
+            {                           // For color image
+                for (int k = 0; k < imgSrc.channels(); ++k)
+                {
+                    newVal = 255;
+                    for (int ii = -(maskRows/2); ii <= (maskRows/2); ++ii)
+                    {
+                        for (int jj = -(maskCols/2); jj <= (maskCols/2); ++jj)
+                        {
+                            r1 = reflect(imgSrc.rows, i - ii);
+                            c1 = reflect(imgSrc.cols, j - jj);
+                            if (imgSrc.at<Vec3b>(r1, c1)[k] < newVal)
+                            {
+                                newVal = imgSrc.at<Vec3b>(r1, c1)[k];
+                            }
+                        }
+                    }
+                    imgDst.at<Vec3b>(i, j)[k] = saturate_cast<uchar>(newVal);
+                }
+            }
+        }
+    }
+}
+
+//
+// Find the zero crossing points in the image
+//
+void MainWindow::zeroCross(const Mat &imgSrc, Mat &imgDst, const double &thres)
+{
+    double minVal;
+    double maxVal;
+    minMaxIdx(imgSrc, &minVal, &maxVal);
+    double thresVal = maxVal * thres;
+
+    int r1;
+    int r2;
+    int c1;
+    int c2;
+    // Traverse all the pixels in source image
+    for (int i = 0; i < imgSrc.rows; ++i)
+    {
+        for (int j = 0; j < imgSrc.cols; ++j)
+        {
+            // Test four cases: left/right, up/down, two diagonals
+            int count = 0;
+
+            // Left right
+            r1 = reflect(imgSrc.rows, i);
+            c1 = reflect(imgSrc.cols, j - 1);
+            c2 = reflect(imgSrc.cols, j + 1);
+
+            if (imgSrc.at<short>(r1, c1) * imgSrc.at<short>(r1, c2) < 0)
+            {
+                if (abs(imgSrc.at<short>(r1, c1) - imgSrc.at<short>(r1, c2)) > thresVal) ++count;
+            }
+
+            // Up down
+            r1 = reflect(imgSrc.rows, i - 1);
+            r2 = reflect(imgSrc.rows, i + 1);
+            c1 = reflect(imgSrc.cols, j);
+
+            if (imgSrc.at<short>(r1, c1) * imgSrc.at<short>(r2, c1) < 0)
+            {
+                if (abs(imgSrc.at<short>(r1, c1) - imgSrc.at<short>(r2, c1)) > thresVal) ++count;
+            }
+
+            // Upper left and lower right
+            r1 = reflect(imgSrc.rows, i - 1);
+            c1 = reflect(imgSrc.cols, j - 1);
+            r2 = reflect(imgSrc.rows, i + 1);
+            c2 = reflect(imgSrc.cols, j + 1);
+            if (imgSrc.at<short>(r1, c1) * imgSrc.at<short>(r2, c2) < 0)
+            {
+                if (abs(imgSrc.at<short>(r1, c1) - imgSrc.at<short>(r2, c2)) > thresVal) ++count;
+            }
+
+            // Lower left and upper right
+            r1 = reflect(imgSrc.rows, i + 1);
+            c1 = reflect(imgSrc.cols, j - 1);
+            r2 = reflect(imgSrc.rows, i - 1);
+            c2 = reflect(imgSrc.cols, j + 1);
+            if (imgSrc.at<short>(r1, c1) * imgSrc.at<short>(r2, c2) < 0)
+            {
+                if (abs(imgSrc.at<short>(r1, c1) - imgSrc.at<short>(r2, c2)) > thresVal) ++count;
+            }
+
+            if (count >= 2)
+            {
+                imgDst.at<uchar>(i, j) = 255;
+            } else
+            {
+                imgDst.at<uchar>(i, j) = 0;
             }
         }
     }

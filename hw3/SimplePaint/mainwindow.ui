@@ -417,12 +417,19 @@
      <addaction name="menuSharpening"/>
      <addaction name="menuOthers"/>
     </widget>
+    <widget class="QMenu" name="menuEdge_Detectors">
+     <property name="title">
+      <string>Edge Detection Methods</string>
+     </property>
+     <addaction name="actionMarr_Hildreth_Edge_Detector"/>
+    </widget>
     <addaction name="actionReset"/>
     <addaction name="actionConvert_to_GRAY_Type_A"/>
     <addaction name="actionConvert_to_GRAY_Type_B"/>
     <addaction name="actionThreshold"/>
     <addaction name="actionHistogram_Equalization"/>
     <addaction name="menuSpatial_filtering_operations"/>
+    <addaction name="menuEdge_Detectors"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -435,6 +442,9 @@
    <addaction name="menuView"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
@@ -457,6 +467,7 @@
    <addaction name="actionMinimum_Filter"/>
    <addaction name="actionLaplacian_filter"/>
    <addaction name="actionUnsharp_Masking"/>
+   <addaction name="actionMarr_Hildreth_Edge_Detector"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -662,6 +673,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionMarr_Hildreth_Edge_Detector">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Marr-Hildreth Edge Detector</string>
    </property>
   </action>
  </widget>
