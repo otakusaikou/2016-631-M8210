@@ -104,6 +104,7 @@ void MainWindow::on_actionOpen_triggered()
 
     // Enable edge detection methods
     ui->actionMarr_Hildreth_Edge_Detector->setDisabled(false);
+    ui->actionSobel_Edge_Detector->setDisabled(false);
 
     // Enable original size image rendering function
     ui->actionRender_original_size_image->setDisabled(false);
@@ -971,6 +972,32 @@ void MainWindow::on_actionMarr_Hildreth_Edge_Detector_triggered()
 }
 
 //
+// Detect the edge with Sobel mask
+//
+void MainWindow::on_actionSobel_Edge_Detector_triggered()
+{
+    // Get threshold of Sobel edge detector
+    SMaskDialog *sMaskDialog = new SMaskDialog(this);
+    if (sMaskDialog->exec() == QDialog::Rejected) return;
+    double thres = sMaskDialog->thres;
+
+    // If current image is color image, convert it to grayscale image
+    if (bufImg.channels() == 3) cvtColor(bufImg, bufImg, COLOR_RGB2GRAY);
+
+    Mat tmpImg = Mat::zeros(bufImg.rows, bufImg.cols, bufImg.type());
+
+    sobel(bufImg, tmpImg, thres);
+    tmpImg.copyTo(bufImg);
+
+    // Update the image label and histogram chart
+    updateFigures();
+
+    // Disable the grayscale conversion function
+    ui->actionConvert_to_GRAY_Type_A->setDisabled(true);
+    ui->actionConvert_to_GRAY_Type_B->setDisabled(true);
+}
+
+//
 // Display the image with original size
 //
 void MainWindow::on_actionRender_original_size_image_triggered()
@@ -1482,7 +1509,7 @@ void MainWindow::zeroCross(const Mat &imgSrc, Mat &imgDst, const double &thres)
 
             if (imgSrc.at<short>(r1, c1) * imgSrc.at<short>(r1, c2) < 0)
             {
-                if (abs(imgSrc.at<short>(r1, c1) - imgSrc.at<short>(r1, c2)) > thresVal) ++count;
+                if (abs(imgSrc.at<short>(r1, c1) - imgSrc.at<short>(r1, c2)) >= thresVal) ++count;
             }
 
             // Up down
@@ -1492,7 +1519,7 @@ void MainWindow::zeroCross(const Mat &imgSrc, Mat &imgDst, const double &thres)
 
             if (imgSrc.at<short>(r1, c1) * imgSrc.at<short>(r2, c1) < 0)
             {
-                if (abs(imgSrc.at<short>(r1, c1) - imgSrc.at<short>(r2, c1)) > thresVal) ++count;
+                if (abs(imgSrc.at<short>(r1, c1) - imgSrc.at<short>(r2, c1)) >= thresVal) ++count;
             }
 
             // Upper left and lower right
@@ -1502,7 +1529,7 @@ void MainWindow::zeroCross(const Mat &imgSrc, Mat &imgDst, const double &thres)
             c2 = reflect(imgSrc.cols, j + 1);
             if (imgSrc.at<short>(r1, c1) * imgSrc.at<short>(r2, c2) < 0)
             {
-                if (abs(imgSrc.at<short>(r1, c1) - imgSrc.at<short>(r2, c2)) > thresVal) ++count;
+                if (abs(imgSrc.at<short>(r1, c1) - imgSrc.at<short>(r2, c2)) >= thresVal) ++count;
             }
 
             // Lower left and upper right
@@ -1512,10 +1539,59 @@ void MainWindow::zeroCross(const Mat &imgSrc, Mat &imgDst, const double &thres)
             c2 = reflect(imgSrc.cols, j + 1);
             if (imgSrc.at<short>(r1, c1) * imgSrc.at<short>(r2, c2) < 0)
             {
-                if (abs(imgSrc.at<short>(r1, c1) - imgSrc.at<short>(r2, c2)) > thresVal) ++count;
+                if (abs(imgSrc.at<short>(r1, c1) - imgSrc.at<short>(r2, c2)) >= thresVal) ++count;
             }
 
             if (count >= 2)
+            {
+                imgDst.at<uchar>(i, j) = 255;
+            } else
+            {
+                imgDst.at<uchar>(i, j) = 0;
+            }
+        }
+    }
+}
+
+//
+// Apply the horizontal and vertical sobel mask
+//
+void MainWindow::sobel(const Mat &imgSrc, Mat &imgDst, const double &thres)
+{
+    double HMask[] = {-1, -2, -1, 0, 0, 0, 1, 2, 1};    // For detection of horizontal edges
+    double VMask[] = {-1, 0, 1, -2, 0, 2, -1, 0, 1};    // For detection of vertical edges
+
+    int r1;             // The pixel index emcompassed by the mask
+    int c1;
+    // Traverse all the pixels in source image
+    for (int i = 0; i < imgSrc.rows; ++i)
+    {
+        for (int j = 0; j < imgSrc.cols; ++j)
+        {
+            // Traverse all the coefficients in the mask
+            int hVal = 0;   // For horizontal edges
+            for (int ii = -1; ii <= 1; ++ii)
+            {
+                for (int jj = -1; jj <= 1; ++jj)
+                {
+                    r1 = reflect(imgSrc.rows, i - ii);
+                    c1 = reflect(imgSrc.cols, j - jj);
+                    hVal += HMask[(3*(ii + 1) + (jj + 1))] * imgSrc.at<uchar>(r1, c1);
+                }
+            }
+
+            int vVal = 0;   // For vertical edges
+            for (int ii = -1; ii <= 1; ++ii)
+            {
+                for (int jj = -1; jj <= 1; ++jj)
+                {
+                    r1 = reflect(imgSrc.rows, i - ii);
+                    c1 = reflect(imgSrc.cols, j - jj);
+                    vVal += VMask[(3*(ii + 1) + (jj + 1))] * imgSrc.at<uchar>(r1, c1);
+                }
+            }
+
+            if (sqrt(hVal*hVal + vVal*vVal) >= thres)
             {
                 imgDst.at<uchar>(i, j) = 255;
             } else

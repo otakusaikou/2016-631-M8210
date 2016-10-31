@@ -422,6 +422,7 @@
       <string>Edge Detection Methods</string>
      </property>
      <addaction name="actionMarr_Hildreth_Edge_Detector"/>
+     <addaction name="actionSobel_Edge_Detector"/>
     </widget>
     <addaction name="actionReset"/>
     <addaction name="actionConvert_to_GRAY_Type_A"/>
@@ -468,6 +469,7 @@
    <addaction name="actionLaplacian_filter"/>
    <addaction name="actionUnsharp_Masking"/>
    <addaction name="actionMarr_Hildreth_Edge_Detector"/>
+   <addaction name="actionSobel_Edge_Detector"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -681,6 +683,14 @@
    </property>
    <property name="text">
     <string>Marr-Hildreth Edge Detector</string>
+   </property>
+  </action>
+  <action name="actionSobel_Edge_Detector">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Sobel Edge Detector</string>
    </property>
   </action>
  </widget>

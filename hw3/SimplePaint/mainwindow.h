@@ -23,6 +23,7 @@
 #include "umaskdialog.h"
 #include "imshowdialog.h"
 #include "mhedgedialog.h"
+#include "smaskdialog.h"
 
 typedef unsigned char uchar;
 
@@ -92,6 +93,8 @@ private slots:
 
     void on_actionRender_original_size_image_triggered();
 
+    void on_actionSobel_Edge_Detector_triggered();
+
 private:
     Ui::MainWindow *ui;
 
@@ -112,6 +115,8 @@ private:
     void min(const cv::Mat &imgSrc, cv::Mat &imgDst, const int &maskRows, const int &maskCols);
 
     void zeroCross(const cv::Mat &imgSrc, cv::Mat &imgDst, const double &thres);
+
+    void sobel(const cv::Mat &imgSrc, cv::Mat &imgDst, const double &thres);
 };
 
 #endif // MAINWINDOW_H
