@@ -1005,9 +1005,15 @@ void MainWindow::updateFigures()
     {
         for (int j = 0; j < bufImg.cols; ++j)
         {
-            for (int k = 0; k < bufImg.channels(); ++k)
-            {
-                ++hist.at(256*k + bufImg.at<Vec3b>(i, j)[k]);
+            if (bufImg.channels() == 1)
+            {                   // For grayscale image
+                ++hist.at(bufImg.at<uchar>(i, j));
+            } else
+            {                   // For color image
+                for (int k = 0; k < bufImg.channels(); ++k)
+                {
+                    ++hist.at(256*k + bufImg.at<Vec3b>(i, j)[k]);
+                }
             }
         }
     }
