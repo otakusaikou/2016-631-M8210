@@ -78,7 +78,6 @@
        </layout>
       </item>
      </layout>
-     <zorder>unsharpWeightLabel</zorder>
     </widget>
    </item>
    <item row="0" column="0">

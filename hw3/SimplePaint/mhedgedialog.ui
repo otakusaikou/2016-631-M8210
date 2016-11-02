@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>747</width>
-    <height>304</height>
+    <width>745</width>
+    <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -123,7 +123,7 @@
         </font>
        </property>
        <property name="title">
-        <string>Laplacian filtering</string>
+        <string>Laplacian Filtering</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_5">
         <item row="0" column="0">

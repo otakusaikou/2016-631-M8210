@@ -105,6 +105,7 @@ void MainWindow::on_actionOpen_triggered()
     // Enable edge detection methods
     ui->actionMarr_Hildreth_Edge_Detector->setDisabled(false);
     ui->actionSobel_Edge_Detector->setDisabled(false);
+    ui->actionFuzzy_Sets_Spatial_Filtering->setDisabled(false);
 
     // Enable original size image rendering function
     ui->actionRender_original_size_image->setDisabled(false);
@@ -311,14 +312,20 @@ void MainWindow::on_actionThreshold_triggered()
         return;
     }
 
+    // Get the thresholding parameters
+    ThresDialog *thresDialog = new ThresDialog(this);
+    if (thresDialog->exec() == QDialog::Rejected) return;
+    int thres = thresDialog->thres;
+    int maxVal = thresDialog->maxVal;
+
     for (int i = 0; i < bufImg.rows; ++i)
     {
         for (int j = 0; j < bufImg.cols; ++j)
         {
             // Assign the new value after thresholding
-            if (bufImg.at<uchar>(i, j) > 127)
+            if (bufImg.at<uchar>(i, j) > thres)
             {
-                bufImg.at<uchar>(i, j) = 255;
+                bufImg.at<uchar>(i, j) = maxVal;
             } else
             {
                 bufImg.at<uchar>(i, j) = 0;
@@ -998,6 +1005,37 @@ void MainWindow::on_actionSobel_Edge_Detector_triggered()
 }
 
 //
+// Edge detection with Fuzzy Sets spatial filtering
+//
+void MainWindow::on_actionFuzzy_Sets_Spatial_Filtering_triggered()
+{
+    // Get parameters of fuzzy sets spatial filtering
+    FuzzySetsDialog *fuzzySetsDialog = new FuzzySetsDialog(this);
+    if (fuzzySetsDialog->exec() == QDialog::Rejected) return;
+    double sigma = fuzzySetsDialog->sigma;
+    int lowerBound = fuzzySetsDialog->lowerBound;
+    int upperBound = fuzzySetsDialog->upperBound;
+
+    // If current image is color image, convert it to grayscale image
+    if (bufImg.channels() == 3) cvtColor(bufImg, bufImg, COLOR_RGB2GRAY);
+
+    Mat tmpImg = Mat::zeros(bufImg.rows, bufImg.cols, bufImg.type());
+
+    fuzzy(bufImg, tmpImg, sigma, lowerBound, upperBound);
+    tmpImg.copyTo(bufImg);
+
+    // Update the image label and histogram chart
+    updateFigures();
+
+    // Disable the grayscale conversion function
+    ui->actionConvert_to_GRAY_Type_A->setDisabled(true);
+    ui->actionConvert_to_GRAY_Type_B->setDisabled(true);
+
+    // Enable the thresholding function after the conversion
+    ui->actionThreshold->setDisabled(false);
+}
+
+//
 // Display the image with original size
 //
 void MainWindow::on_actionRender_original_size_image_triggered()
@@ -1231,7 +1269,7 @@ int MainWindow::reflect(const int &M, const int &x)
 //
 void MainWindow::convolve(const Mat &imgSrc, Mat &imgDst, const double *mask, const int &maskRows, const int &maskCols, const int &depth)
 {
-    double newVal;      // The new value
+    double newVal;
     int r1;             // The pixel index emcompassed by the mask
     int c1;
     // Traverse all the pixels in source image
@@ -1294,7 +1332,6 @@ void MainWindow::convolve(const Mat &imgSrc, Mat &imgDst, const double *mask, co
 //
 void MainWindow::genGaussianFilter(const int &size, const double &sigma, double *gFilter)
 {
-    double r;
     double s = 2.0 * sigma * sigma;
 
     // Sum of all values for normalization
@@ -1305,8 +1342,7 @@ void MainWindow::genGaussianFilter(const int &size, const double &sigma, double 
     {
         for(int y = -(size/2); y <= (size/2); ++y)
         {
-            r = sqrt(x*x + y*y);
-            gFilter[size*(x+(size/2)) + (y+(size/2))] = (exp(-(r*r)/s)) / (M_PI * s);
+            gFilter[size*(x+(size/2)) + (y+(size/2))] = (exp(-(x*x + y*y)/s)) / (M_PI * s);
             sum += gFilter[size*(x+(size/2)) + (y+(size/2))];
         }
     }
@@ -1377,7 +1413,7 @@ void MainWindow::median(const Mat &imgSrc, Mat &imgDst, const int &maskRows, con
 //
 void MainWindow::max(const Mat &imgSrc, Mat &imgDst, const int &maskRows, const int &maskCols)
 {
-    uchar newVal;       // The new value
+    uchar newVal;
     int r1;             // The pixel index emcompassed by the mask
     int c1;
     // Traverse all the pixels in source image
@@ -1431,7 +1467,7 @@ void MainWindow::max(const Mat &imgSrc, Mat &imgDst, const int &maskRows, const 
 //
 void MainWindow::min(const Mat &imgSrc, Mat &imgDst, const int &maskRows, const int &maskCols)
 {
-    uchar newVal;       // The new value
+    uchar newVal;
     int r1;             // The pixel index emcompassed by the mask
     int c1;
     // Traverse all the pixels in source image
@@ -1598,6 +1634,75 @@ void MainWindow::sobel(const Mat &imgSrc, Mat &imgDst, const double &thres)
             {
                 imgDst.at<uchar>(i, j) = 0;
             }
+        }
+    }
+}
+
+//
+// Implementation of fuzzy sets spatial filtering
+//
+void MainWindow::fuzzy(const cv::Mat &imgSrc, cv::Mat &imgDst, const double &sigma, const int &lowerBound, const int &upperBound)
+{
+    // Traverse all the pixels in source image
+    for (int i = 0; i < imgSrc.rows; ++i)
+    {
+        for (int j = 0; j < imgSrc.cols; ++j)
+        {
+            // 4-adjacency
+            uchar neighbors[] = {
+                imgSrc.at<uchar>(reflect(imgSrc.rows, i-1), reflect(imgSrc.cols, j)),
+                imgSrc.at<uchar>(reflect(imgSrc.rows, i), reflect(imgSrc.cols, j+1)),
+                imgSrc.at<uchar>(reflect(imgSrc.rows, i+1), reflect(imgSrc.cols, j)),
+                imgSrc.at<uchar>(reflect(imgSrc.rows, i), reflect(imgSrc.cols, j-1))};
+
+            double w[5] = {1};          // Response for clipping the function WH and BL
+            double v[5] = {255};        // Intensity value from WH or BL function
+
+            // IF-THEN rules
+            for (int k = 0; k < 4; ++k)
+            {
+                // Intensity difference
+                int di1 = neighbors[k] - imgSrc.at<uchar>(i, j);
+                int di2 = neighbors[(k+1) % 4] - imgSrc.at<uchar>(i, j);
+
+                // If di1 AND di2 is ZE (take minimum ZE), THEN give current pixel white value (from WH function)
+                if (abs(di1) > abs(di2))
+                {
+                    w[k] = exp(-(1./2) * (di1/sigma)*(di1/sigma));       // ZE function is normal distribution with expected value
+                } else                                          // mu = 0 and coefficient A = 1
+                {
+                    w[k] = exp(-(1./2) * (di2/sigma)*(di2/sigma));
+                }
+
+                // Membership function of the fuzzy set WH
+                // y = (1 / ((L - 1) - lower bound)) * (x - lower bound)
+                // Use the gravity of the clipped triangular region as output value
+                v[k] = (w[k]*((255)-lowerBound) + 2*lowerBound + 510) / 4;
+
+
+                // ELSE rule (take minimum ZE), THEN give current pixel black value (from BL function)
+                if (1 - w[k] < w[4])
+                {
+                    w[4] = 1 - w[k];
+
+                    // Membership function of the fuzzy set BL
+                    // y = (-1 / upper bound) * x + 1
+                    // Use the gravity of the clipped triangular region as output value
+                    v[4] = ((2-w[k])*upperBound) / 4;
+                }
+            }
+
+            // Defuzzification (find center of gravity)
+            double newVal = 0;
+            double sumZE = 0;
+
+            for (int k = 0; k < 5; ++k)
+            {
+                newVal += w[k] * v[k];
+                sumZE += w[k];
+            }
+
+            imgDst.at<uchar>(i, j) = saturate_cast<uchar>(newVal / sumZE);
         }
     }
 }

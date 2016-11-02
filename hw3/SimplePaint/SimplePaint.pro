@@ -20,7 +20,9 @@ SOURCES += main.cpp\
     umaskdialog.cpp \
     imshowdialog.cpp \
     mhedgedialog.cpp \
-    smaskdialog.cpp
+    smaskdialog.cpp \
+    fuzzysetsdialog.cpp \
+    thresdialog.cpp
 
 HEADERS  += mainwindow.h \
     masksizedialog.h \
@@ -29,7 +31,9 @@ HEADERS  += mainwindow.h \
     umaskdialog.h \
     imshowdialog.h \
     mhedgedialog.h \
-    smaskdialog.h
+    smaskdialog.h \
+    fuzzysetsdialog.h \
+    thresdialog.h
 
 FORMS    += mainwindow.ui \
     masksizedialog.ui \
@@ -38,7 +42,9 @@ FORMS    += mainwindow.ui \
     umaskdialog.ui \
     imshowdialog.ui \
     mhedgedialog.ui \
-    smaskdialog.ui
+    smaskdialog.ui \
+    fuzzysetsdialog.ui \
+    thresdialog.ui
 
 # User defined settings
 QT       += charts

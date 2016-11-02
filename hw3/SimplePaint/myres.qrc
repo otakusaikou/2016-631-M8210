@@ -14,5 +14,10 @@
         <file>icons/median-filter-icon.png</file>
         <file>icons/averaging-filter-icon.png</file>
         <file>icons/render-image-icon.png</file>
+        <file>icons/laplacian-filter-icon.png</file>
+        <file>icons/unsharp-masking-icon.png</file>
+        <file>icons/sobel-edge-detector-icon.png</file>
+        <file>icons/marr-hildreth-edge-detector.png</file>
+        <file>icons/fuzzy-sets-icon.png</file>
     </qresource>
 </RCC>

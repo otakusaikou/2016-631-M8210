@@ -17,6 +17,7 @@
 #include <vector>
 #include <cmath>
 #include <ctime>
+#include "thresdialog.h"
 #include "masksizedialog.h"
 #include "maskdialog.h"
 #include "gmaskdialog.h"
@@ -24,6 +25,7 @@
 #include "imshowdialog.h"
 #include "mhedgedialog.h"
 #include "smaskdialog.h"
+#include "fuzzysetsdialog.h"
 
 typedef unsigned char uchar;
 
@@ -91,9 +93,11 @@ private slots:
 
     void on_actionMarr_Hildreth_Edge_Detector_triggered();
 
-    void on_actionRender_original_size_image_triggered();
-
     void on_actionSobel_Edge_Detector_triggered();
+
+    void on_actionFuzzy_Sets_Spatial_Filtering_triggered();
+
+    void on_actionRender_original_size_image_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -117,6 +121,8 @@ private:
     void zeroCross(const cv::Mat &imgSrc, cv::Mat &imgDst, const double &thres);
 
     void sobel(const cv::Mat &imgSrc, cv::Mat &imgDst, const double &thres);
+
+    void fuzzy(const cv::Mat &imgSrc, cv::Mat &imgDst, const double &sigma, const int &lowerBound, const int &upperBound);
 };
 
 #endif // MAINWINDOW_H

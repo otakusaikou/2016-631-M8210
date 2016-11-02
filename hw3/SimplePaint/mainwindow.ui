@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1020</width>
-    <height>541</height>
+    <height>540</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -423,6 +423,7 @@
      </property>
      <addaction name="actionMarr_Hildreth_Edge_Detector"/>
      <addaction name="actionSobel_Edge_Detector"/>
+     <addaction name="actionFuzzy_Sets_Spatial_Filtering"/>
     </widget>
     <addaction name="actionReset"/>
     <addaction name="actionConvert_to_GRAY_Type_A"/>
@@ -470,6 +471,7 @@
    <addaction name="actionUnsharp_Masking"/>
    <addaction name="actionMarr_Hildreth_Edge_Detector"/>
    <addaction name="actionSobel_Edge_Detector"/>
+   <addaction name="actionFuzzy_Sets_Spatial_Filtering"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -614,6 +616,10 @@
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="myres.qrc">
+     <normaloff>:/Icon/icons/laplacian-filter-icon.png</normaloff>:/Icon/icons/laplacian-filter-icon.png</iconset>
+   </property>
    <property name="text">
     <string>Laplacian Filter</string>
    </property>
@@ -658,6 +664,10 @@
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="myres.qrc">
+     <normaloff>:/Icon/icons/unsharp-masking-icon.png</normaloff>:/Icon/icons/unsharp-masking-icon.png</iconset>
+   </property>
    <property name="text">
     <string>Unsharp Masking</string>
    </property>
@@ -681,6 +691,10 @@
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="myres.qrc">
+     <normaloff>:/Icon/icons/marr-hildreth-edge-detector.png</normaloff>:/Icon/icons/marr-hildreth-edge-detector.png</iconset>
+   </property>
    <property name="text">
     <string>Marr-Hildreth Edge Detector</string>
    </property>
@@ -689,8 +703,24 @@
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="myres.qrc">
+     <normaloff>:/Icon/icons/sobel-edge-detector-icon.png</normaloff>:/Icon/icons/sobel-edge-detector-icon.png</iconset>
+   </property>
    <property name="text">
     <string>Sobel Edge Detector</string>
+   </property>
+  </action>
+  <action name="actionFuzzy_Sets_Spatial_Filtering">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="myres.qrc">
+     <normaloff>:/Icon/icons/fuzzy-sets-icon.png</normaloff>:/Icon/icons/fuzzy-sets-icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Fuzzy Sets Spatial Filtering</string>
    </property>
   </action>
  </widget>
