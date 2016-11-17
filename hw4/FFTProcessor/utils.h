@@ -11,7 +11,7 @@ public:
     void getMagnitude(const cv::Mat &src, cv::Mat &dst);
     void shiftMat(cv::Mat &dst);
     void normMat(cv::Mat &dst);
-    void HFiltering(const cv::Mat &src, cv::Mat &mask, cv::Mat &dst, cv::Mat &dstFFT);
+    void HFiltering(const cv::Mat &src, const cv::Mat &dstFFT, cv::Mat &mask, cv::Mat &dst);
 
     cv::Mat getIMask(const cv::Size &size, const double &D0, const bool &isLowpass);
     cv::Mat getBMask(const cv::Size &size, const double &D0, const int &n

@@ -59,7 +59,7 @@ void MainWindow::on_actionOpen_triggered()
 
     // Initialize the mask property panel
     int maximum = (bufSrc.rows > bufSrc.cols ? bufSrc.rows : bufSrc.cols);
-    ui->D0ValSlider->setMaximum(maximum/2);
+    ui->D0ValSlider->setMaximum(maximum);
 
     /* Create FFT image */
     // Transform the image from spatial domain to frequency domain
@@ -360,13 +360,27 @@ void MainWindow::on_actionHomomorphic_Filter_triggered()
     ui->BMaskOrderSpinBox->setEnabled(false);
 
     mode = 3;           // Change the mode number
+
+    /* Create FFT Image */
+    bufSrc.convertTo(bufDst, CV_64F);       // Normalize the source image
+    double min;
+    double max;
+    cv::minMaxLoc(bufDst, &min, &max);
+    bufDst /= max;
+
+    bufDst += 1;
+    log(bufDst, bufDst);
+
+    bufFFTLog = processor.getOptimalImg(bufDst);    // Create optimized two band image
+
+    dft(bufFFTLog, bufFFTLog);                      // FFT transformation
+
     applyMask();        // Update the mask
 
     // Create a normalized mask for the display
     Mat normMat;
     bufMask.copyTo(normMat);
-    normMat = (255 * (normMat - gammaL) / (gammaH - gammaL));
-
+    normMat *= 255;
     processor.shiftMat(normMat);
     updateFigures(normMat, ui->maskLabel);
 
@@ -635,6 +649,7 @@ void MainWindow::init()
     bufFFTSrc.release();
     bufMask.release();
     bufDst.release();
+    bufFFTLog.release();
     bufFFTDst.release();
 
     D0 = 1;
@@ -724,7 +739,11 @@ void MainWindow::applyMask()
     } else if (mode == 3)       // Homomorphic filter
     {
         bufMask = processor.getHMask(bufFFTSrc.size(), gammaH, gammaL, c, D0);
-        processor.HFiltering(bufSrc, bufMask, bufDst, bufFFTDst);
+        processor.HFiltering(bufSrc, bufFFTLog, bufMask, bufDst);
+
+        // Regenerate a FFT image for enhanced image
+        bufFFTDst = processor.getOptimalImg(bufDst);
+        dft(bufFFTDst, bufFFTDst);
         return;
     }
 
@@ -734,4 +753,27 @@ void MainWindow::applyMask()
 
     // Transform the image from frequency domain to spatial domain
     dft(bufFFTDst, bufDst, DFT_INVERSE | DFT_SCALE | DFT_REAL_OUTPUT);
+
+    // Extract the source image region
+    bufDst = bufDst(Rect(0, 0, bufSrc.cols, bufSrc.rows));
+}
+
+//
+// Reset the application state
+//
+void MainWindow::on_actionReset_triggered()
+{
+    init();
+
+    // Copy the source image to image buffer
+    imgSrc.convertTo(bufSrc, CV_64F);
+    updateFigures(bufSrc, ui->srcImgLabel);         // Update the image label
+
+    // Transform the image from spatial domain to frequency domain
+    bufFFTSrc = processor.getOptimalImg(bufSrc);    // Create optimized two band image
+    dft(bufFFTSrc, bufFFTSrc);                      // The FFT need two band image for computation
+
+    // Initialize the output FFT image buffer
+    bufFFTLog = Mat::zeros(bufFFTSrc.size(), CV_64FC2);
+    bufFFTDst = Mat::zeros(bufFFTSrc.size(), CV_64FC2);
 }

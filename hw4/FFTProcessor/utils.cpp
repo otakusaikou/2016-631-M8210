@@ -84,28 +84,25 @@ void utils::normMat(Mat &dst)
 //
 // Enhance given image with Homomorphic filtering
 //
-void utils::HFiltering(const Mat &src
-    , Mat &mask
-    , Mat &dst
-    , Mat &dstFFT)
+void utils::HFiltering(const Mat &src, const Mat &dstFFT, Mat &mask, Mat &dst)
 {
-    src.convertTo(dst, CV_64F);
-    dst += Scalar(1);
-    log(dst, dst);
-
-    // Create optimized two band image
-    dstFFT = getOptimalImg(dst);
-    dft(dstFFT, dstFFT);
-
     // Apply the filter
+    Mat buf = Mat::zeros(dstFFT.size(), CV_64FC2);
     shiftMat(mask);
-    multiplyMat(dstFFT, mask, dstFFT);
+    multiplyMat(dstFFT, mask, buf);
 
     // Calculate the inverse of FFT
-    dft(dstFFT, dst, DFT_INVERSE | DFT_SCALE | DFT_REAL_OUTPUT);
+    dft(buf, dst, DFT_INVERSE | DFT_SCALE | DFT_REAL_OUTPUT);
+
+    // Extract the source image region and restore the original grayscale level
+    dst = dst(Rect(0, 0, src.cols, src.rows));
     exp(dst, dst);
-    dst -= Scalar(1);
-    normMat(dst);
+    dst -= 1;
+
+    double min;
+    double max;
+    cv::minMaxLoc(src, &min, &max);
+    dst *= max;
 }
 
 //
@@ -209,8 +206,8 @@ Mat utils::getHMask(const Size &size
 Mat utils::getOptimalImg(const Mat &img)
 {
     // Expand input image to optimal size
-    int m = getOptimalDFTSize(img.rows);
-    int n = getOptimalDFTSize(img.cols);
+    int m = img.rows * 2;
+    int n = img.cols * 2;
 
     Mat padded = Mat::zeros(m, n, CV_64F);
     img.copyTo(padded(Rect(0, 0, img.cols, img.rows)));
@@ -218,11 +215,7 @@ Mat utils::getOptimalImg(const Mat &img)
     // Generate a new two band image with the second channel is an empty image
     Mat fftImg = Mat::zeros(padded.rows, padded.cols, CV_64FC2);
     for (int i = 0; i < fftImg.rows; ++i)
-    {
         for (int j = 0; j < fftImg.cols; ++j)
-        {
             fftImg.at<Vec2d>(i, j) = Vec2d(padded.at<double>(i, j), 0);
-        }
-    }
     return fftImg;
 }

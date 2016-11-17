@@ -26,6 +26,7 @@ public:
     cv::Mat bufSrc;         // Image buffer for source image
     cv::Mat bufFFTSrc;      // Image buffer for source FFT image
     cv::Mat bufMask;        // Buffer for mask
+    cv::Mat bufFFTLog;      // Buffer for FFT of logarithmic image
     cv::Mat bufDst;         // Image buffer for destination image
     cv::Mat bufFFTDst;      // Image buffer for dsetination FFT image
     utils processor;        // FFT processor
@@ -74,6 +75,8 @@ private slots:
     void on_LPFRadioButton_clicked();
 
     void on_HPFRadiobutton_clicked();
+
+    void on_actionReset_triggered();
 
 private:
     Ui::MainWindow *ui;
