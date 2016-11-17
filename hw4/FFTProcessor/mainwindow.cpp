@@ -712,18 +712,18 @@ void MainWindow::applyMask()
     if (mode == 0)              // Ideal filter
     {
         bool isLowpass = ui->LPFRadioButton->isChecked();
-        bufMask = processor.getIMask(bufSrc.size(), D0, isLowpass);
+        bufMask = processor.getIMask(bufFFTSrc.size(), D0, isLowpass);
     } else if (mode == 1)       // Butterworth filter
     {
         bool isLowpass = ui->LPFRadioButton->isChecked();
-        bufMask = processor.getBMask(bufSrc.size(), D0, n, isLowpass);
+        bufMask = processor.getBMask(bufFFTSrc.size(), D0, n, isLowpass);
     } else if (mode == 2)       // Gaussian filter
     {
         bool isLowpass = ui->LPFRadioButton->isChecked();
-        bufMask = processor.getGMask(bufSrc.size(), D0, isLowpass);
+        bufMask = processor.getGMask(bufFFTSrc.size(), D0, isLowpass);
     } else if (mode == 3)       // Homomorphic filter
     {
-        bufMask = processor.getHMask(bufSrc.size(), gammaH, gammaL, c, D0);
+        bufMask = processor.getHMask(bufFFTSrc.size(), gammaH, gammaL, c, D0);
         processor.HFiltering(bufSrc, bufMask, bufDst, bufFFTDst);
         return;
     }
