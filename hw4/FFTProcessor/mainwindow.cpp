@@ -46,7 +46,7 @@ void MainWindow::on_actionOpen_triggered()
 
     /* For GUI */
     this->setWindowTitle("FFTProcessor - " + fileName);         // Reset mainwindow title
-
+    ui->actionReset->setEnabled(true);                          // For reset buttion
     init();
 
     // Convert to grayscale
@@ -67,6 +67,85 @@ void MainWindow::on_actionOpen_triggered()
     dft(bufFFTSrc, bufFFTSrc);                      // The FFT need two band image for computation
 
     // Initialize the output FFT image buffer
+    bufFFTDst = Mat::zeros(bufFFTSrc.size(), CV_64FC2);
+}
+
+//
+// Save the result (*.bmp, *.jpg, *.jpeg)
+//
+void MainWindow::on_actionSave_triggered()
+{
+    // Check whether the image label is empty
+    if (!ui->dstImgLabel->pixmap())
+    {
+        msgBox = QMessageBox::warning(this,
+                     tr("File I/O Error"),
+                     tr("There are no result images available.\n"));
+        return;
+    }
+
+    // Get the output image file name
+    // Set default extension for saving image
+    QString tempFileName = QFileDialog::getSaveFileName(this,
+        tr("Save Image"), fileName.split(".", QString::SkipEmptyParts).at(0) + ".bmp",
+        tr("Image Files (BMP (*.bmp);;JPEG (*.jpg *.jpeg)"));
+
+    if(!tempFileName.isEmpty() && !tempFileName.isNull())
+    {
+        QString f = tempFileName.split(".", QString::SkipEmptyParts).at(0);
+        QString e;
+        // Check file extension
+        if (tempFileName.split(".", QString::SkipEmptyParts).length() == 1)
+        {
+            e = ".bmp";
+        } else {
+            e = "." + tempFileName.split(".", QString::SkipEmptyParts).at(1);
+        }
+
+        Mat bufSave;
+
+        // Save output image in spatial domain
+        bufDst.convertTo(bufSave, CV_8U);
+        imwrite((f + e).toStdString(), bufSave);
+
+        // Save output image in frequency domain
+        toSpm(bufFFTDst, bufSave);
+        bufSave.convertTo(bufSave, CV_8U);
+        imwrite((f + "_dst_fft" + e).toStdString(), bufSave);
+
+        // Save the FFT image and mask of input file
+        bufMask.copyTo(bufSave);
+        bufSave *= 255;
+        processor.shiftMat(bufSave);
+        bufSave.convertTo(bufSave, CV_8U);
+        imwrite((f + "_mask" + e).toStdString(), bufSave);
+
+        toSpm(bufFFTSrc, bufSave);
+        bufSave.convertTo(bufSave, CV_8U);
+        imwrite((f + "_src_fft" + e).toStdString(), bufSave);
+    } else
+    {                    // The case with empty file name
+        return;
+    }
+}
+
+//
+// Reset the application state
+//
+void MainWindow::on_actionReset_triggered()
+{
+    init();
+
+    // Copy the source image to image buffer
+    imgSrc.convertTo(bufSrc, CV_64F);
+    updateFigures(bufSrc, ui->srcImgLabel);         // Update the image label
+
+    // Transform the image from spatial domain to frequency domain
+    bufFFTSrc = processor.getOptimalImg(bufSrc);    // Create optimized two band image
+    dft(bufFFTSrc, bufFFTSrc);                      // The FFT need two band image for computation
+
+    // Initialize the output FFT image buffer
+    bufFFTLog = Mat::zeros(bufFFTSrc.size(), CV_64FC2);
     bufFFTDst = Mat::zeros(bufFFTSrc.size(), CV_64FC2);
 }
 
@@ -677,15 +756,8 @@ void MainWindow::updateFigures(const Mat &src, QLabel *label)
     QImage QImg;
 
     // Conver opencv image matrix to QImage object
-    if (src.channels() == 1)
-    {                   // For grayscale image
-        QImg = QImage((const uchar*) (bufShow.data),
-                            bufShow.cols, bufShow.rows, bufShow.step1(), QImage::Format_Grayscale8);
-    } else
-    {                   // For color image
-        QImg = QImage((const uchar*) (bufShow.data),
-                            bufShow.cols, bufShow.rows, bufShow.step1(), QImage::Format_RGB888);
-    }
+    QImg = QImage((const uchar*) (bufShow.data),
+                        bufShow.cols, bufShow.rows, bufShow.step1(), QImage::Format_Grayscale8);
 
     // Resize the QImage to fit the label display
     QImage imgResize = QImg.scaled(label->width(), label->height(), Qt::KeepAspectRatio);
@@ -756,24 +828,4 @@ void MainWindow::applyMask()
 
     // Extract the source image region
     bufDst = bufDst(Rect(0, 0, bufSrc.cols, bufSrc.rows));
-}
-
-//
-// Reset the application state
-//
-void MainWindow::on_actionReset_triggered()
-{
-    init();
-
-    // Copy the source image to image buffer
-    imgSrc.convertTo(bufSrc, CV_64F);
-    updateFigures(bufSrc, ui->srcImgLabel);         // Update the image label
-
-    // Transform the image from spatial domain to frequency domain
-    bufFFTSrc = processor.getOptimalImg(bufSrc);    // Create optimized two band image
-    dft(bufFFTSrc, bufFFTSrc);                      // The FFT need two band image for computation
-
-    // Initialize the output FFT image buffer
-    bufFFTLog = Mat::zeros(bufFFTSrc.size(), CV_64FC2);
-    bufFFTDst = Mat::zeros(bufFFTSrc.size(), CV_64FC2);
 }

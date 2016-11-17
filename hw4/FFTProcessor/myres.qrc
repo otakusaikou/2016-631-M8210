@@ -7,5 +7,6 @@
         <file>icons/gaussian-filter-icon.png</file>
         <file>icons/homomorphic-filter-icon.png</file>
         <file>icons/ideal-filter-icon.png</file>
+        <file>icons/document-save.svg</file>
     </qresource>
 </RCC>
