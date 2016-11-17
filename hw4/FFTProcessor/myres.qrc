@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/Icon">
+        <file>icons/application-exit.svg</file>
+        <file>icons/butterworth-filter-icon.png</file>
+        <file>icons/document-open.svg</file>
+        <file>icons/document-revert.svg</file>
+        <file>icons/gaussian-filter-icon.png</file>
+        <file>icons/homomorphic-filter-icon.png</file>
+        <file>icons/ideal-filter-icon.png</file>
+    </qresource>
+</RCC>
