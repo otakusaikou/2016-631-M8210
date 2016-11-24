@@ -47,7 +47,8 @@ void MainWindow::on_actionOpen_triggered()
     /* For GUI */
     this->setWindowTitle("FFTProcessor - " + fileName);         // Reset mainwindow title
     ui->actionReset->setEnabled(true);                          // For reset buttion
-    init();
+    bool hasImg = ui->srcImgLabel->pixmap();
+    init(hasImg);
 
     // Convert to grayscale
     if (imgSrc.channels() > 1)
@@ -60,6 +61,7 @@ void MainWindow::on_actionOpen_triggered()
     // Initialize the mask property panel
     int maximum = (bufSrc.rows > bufSrc.cols ? bufSrc.rows : bufSrc.cols);
     ui->D0ValSlider->setMaximum(maximum);
+    ui->D0Val->setMaximum(maximum);
 
     /* Create FFT image */
     // Transform the image from spatial domain to frequency domain
@@ -134,7 +136,7 @@ void MainWindow::on_actionSave_triggered()
 //
 void MainWindow::on_actionReset_triggered()
 {
-    init();
+    init(true);
 
     // Copy the source image to image buffer
     imgSrc.convertTo(bufSrc, CV_64F);
@@ -222,12 +224,12 @@ void MainWindow::on_actionIdeal_filter_triggered()
     // Disable parameters for other type of mask
     ui->gammaHLabel->setEnabled(false);             // Parameter 'gammaH' in Homomorphic filter
     ui->gammaHSlider->setEnabled(false);
-    ui->gammaHSlider->setValue(100);
+    ui->gammaHVal->setValue(10);
     ui->gammaHVal->setEnabled(false);
 
     ui->gammaLLabel->setEnabled(false);             // Parameter 'gammaL' in Homomorphic filter
     ui->gammaLSlider->setEnabled(false);
-    ui->gammaLSlider->setValue(0);
+    ui->gammaLVal->setValue(0);
     ui->gammaLVal->setEnabled(false);
 
     ui->BMaskOrderLabel->setEnabled(false);         // Parameter 'n' in Butterworth filter
@@ -292,12 +294,12 @@ void MainWindow::on_actionButterworth_Filter_triggered()
     // Disable parameters for other type of mask
     ui->gammaHLabel->setEnabled(false);             // Parameter 'gammaH' in Homomorphic filter
     ui->gammaHSlider->setEnabled(false);
-    ui->gammaHSlider->setValue(100);
+    ui->gammaHVal->setValue(10);
     ui->gammaHVal->setEnabled(false);
 
     ui->gammaLLabel->setEnabled(false);             // Parameter 'gammaL' in Homomorphic filter
     ui->gammaLSlider->setEnabled(false);
-    ui->gammaLSlider->setValue(0);
+    ui->gammaLVal->setValue(0);
     ui->gammaLVal->setEnabled(false);
 
     ui->CLabel->setEnabled(false);                  // Parameter 'c' in Homomorphic filter
@@ -354,12 +356,12 @@ void MainWindow::on_actionGaussian_Filter_triggered()
     // Disable parameters for other type of mask
     ui->gammaHLabel->setEnabled(false);             // Parameter 'gammaH' in Homomorphic filter
     ui->gammaHSlider->setEnabled(false);
-    ui->gammaHSlider->setValue(100);
+    ui->gammaHVal->setValue(10);
     ui->gammaHVal->setEnabled(false);
 
     ui->gammaLLabel->setEnabled(false);             // Parameter 'gammaL' in Homomorphic filter
     ui->gammaLSlider->setEnabled(false);
-    ui->gammaLSlider->setValue(0);
+    ui->gammaLVal->setValue(0);
     ui->gammaLVal->setEnabled(false);
 
     ui->BMaskOrderLabel->setEnabled(false);         // Enable the spinbox for constant 'n'
@@ -416,12 +418,12 @@ void MainWindow::on_actionHomomorphic_Filter_triggered()
     // Enable sliders for determining the high and low value of Homomorphic filter
     ui->gammaHLabel->setEnabled(true);             // Parameter 'gammaH' in Homomorphic filter
     ui->gammaHSlider->setEnabled(true);
-    ui->gammaHSlider->setValue(100);
+    ui->gammaHVal->setValue(10);
     ui->gammaHVal->setEnabled(true);
 
     ui->gammaLLabel->setEnabled(true);             // Parameter 'gammaL' in Homomorphic filter
     ui->gammaLSlider->setEnabled(true);
-    ui->gammaLSlider->setValue(0);
+    ui->gammaLVal->setValue(0);
     ui->gammaLVal->setEnabled(true);
 
     ui->CLabel->setEnabled(true);                  // Parameter 'c' in Homomorphic filter
@@ -475,15 +477,21 @@ void MainWindow::on_actionHomomorphic_Filter_triggered()
 }
 
 //
-// Apply the mask after the slide bar of D0 changed
+// Update the D0 spinbox when the D0 slider moved
 //
-void MainWindow::on_D0ValSlider_valueChanged(int value)
+void MainWindow::on_D0ValSlider_sliderMoved(int position)
 {
-    // Update the value label beside the slider
-    QString valStr = QString::number(value);
-    ui->D0Val->setText(valStr);
+    ui->D0Val->setValue(position);
+}
 
-    D0 = ui->D0ValSlider->value();
+//
+// Apply the mask after the D0 spinbox changed
+//
+void MainWindow::on_D0Val_valueChanged(int arg1)
+{
+    ui->D0ValSlider->setValue(arg1);
+
+    D0 = arg1;
     applyMask();        // Update the mask and output image buffer
 
     // Create a normalized mask for the display
@@ -505,19 +513,29 @@ void MainWindow::on_D0ValSlider_valueChanged(int value)
 }
 
 //
-// Apply the mask after the slide bar of gammaH changed
+// Update the gammaH spinbox when the gammaH slider moved
 //
-void MainWindow::on_gammaHSlider_valueChanged(int value)
+void MainWindow::on_gammaHSlider_sliderMoved(int position)
 {
     // Limit the domain to be (1 <= gammaH)  AND (10 >= gammaH)
     double maximum = 10;
     double step = (maximum-1) / 100;
-    double val = maximum - (100-value)*step;
-    QString valStr = QString::number(val, 'f', 2);
-    ui->gammaHVal->setText(valStr);
+    double val = maximum - (100-position)*step;
+    ui->gammaHVal->setValue(val);
+}
 
-    gammaH = val;
+//
+// Apply the mask after the gammaH spinbox changed
+//
+void MainWindow::on_gammaHVal_valueChanged(double arg1)
+{
+    // Limit the domain to be (1 <= gammaH)  AND (10 >= gammaH)
+    double maximum = 10;
+    double step = (maximum-1) / 100;
+    int position = static_cast<int>(100 - (maximum-arg1)/step);
+    ui->gammaHSlider->setValue(position);
 
+    gammaH = arg1;
     applyMask();        // Update the mask
 
     // Create a normalized mask for the display
@@ -539,19 +557,29 @@ void MainWindow::on_gammaHSlider_valueChanged(int value)
 }
 
 //
-// Apply the mask after the slide bar of gammaL changed
+// Update the gammaL spinbox when the gammaL slider moved
 //
-void MainWindow::on_gammaLSlider_valueChanged(int value)
+void MainWindow::on_gammaLSlider_sliderMoved(int position)
 {
-    // Limit the domain to be (1 <= gammaL)  AND (10 >= gammaL)
+    // Limit the domain to be (0 <= gammaL)  AND (1 >= gammaL)
     double maximum = 1;
     double step = maximum / 100;
-    double val = maximum - (100-value)*step;
-    QString valStr = QString::number(val, 'f', 2);
-    ui->gammaLVal->setText(valStr);
+    double val = maximum - (100-position)*step;
+    ui->gammaLVal->setValue(val);
+}
 
-    gammaL = val;
+//
+// Apply the mask after the gammaL spinbox changed
+//
+void MainWindow::on_gammaLVal_valueChanged(double arg1)
+{
+    // Limit the domain to be (0 <= gammaL)  AND (1 >= gammaL)
+    double maximum = 1;
+    double step = maximum / 100;
+    int position = static_cast<int>(100 - (maximum-arg1)/step);
+    ui->gammaLSlider->setValue(position);
 
+    gammaL = arg1;
     applyMask();        // Update the mask
 
     // Create a normalized mask for the display
@@ -677,7 +705,7 @@ void MainWindow::on_HPFRadiobutton_clicked()
 //
 // Reset all the attribures
 //
-void MainWindow::init()
+void MainWindow::init(const bool &resetVal)
 {
     ui->actionIdeal_filter->setEnabled(true);       // Enable mask filtering functions
     ui->actionButterworth_Filter->setEnabled(true);
@@ -685,43 +713,48 @@ void MainWindow::init()
     ui->actionHomomorphic_Filter->setEnabled(true);
 
     // Enable the radiobutton in source image group box
-    ui->srcSpaRadioButton->setChecked(true);
     ui->srcSpaRadioButton->setEnabled(true);
     ui->srcFreqRadioButton->setEnabled(true);
 
-    // Disable the radiobutton in output image group box
-    ui->dstSpaRadioButton->setChecked(true);
+    // Disable the radiobutton in output image group box 
     ui->dstSpaRadioButton->setEnabled(false);
     ui->dstFreqRadioButton->setEnabled(false);
 
     // Disable all widget in mask property panel
     ui->D0ValLabel->setEnabled(false);              // The cuts off radius
     ui->D0ValSlider->setEnabled(false);
-    ui->D0ValSlider->setValue(0);
     ui->D0Val->setEnabled(false);
 
     ui->gammaHLabel->setEnabled(false);             // Parameter 'gammaH' in Homomorphic filter
-    ui->gammaHSlider->setEnabled(false);
-    ui->gammaHSlider->setValue(100);
+    ui->gammaHSlider->setEnabled(false); 
     ui->gammaHVal->setEnabled(false);
 
     ui->gammaLLabel->setEnabled(false);             // Parameter 'gammaL' in Homomorphic filter
     ui->gammaLSlider->setEnabled(false);
-    ui->gammaLSlider->setValue(0);
     ui->gammaLVal->setEnabled(false);
 
-    ui->BMaskOrderLabel->setEnabled(false);         // Parameter 'n' in Butterworth filter
-    ui->BMaskOrderSpinBox->setValue(1);
+    ui->BMaskOrderLabel->setEnabled(false);         // Parameter 'n' in Butterworth filter 
     ui->BMaskOrderSpinBox->setEnabled(false);
 
     ui->CLabel->setEnabled(false);                  // Parameter 'c' in Homomorphic filter
-    ui->CSpinBox->setValue(1);
     ui->CSpinBox->setEnabled(false);
 
-    // Enable the mask type switching radiobuttons
-    ui->LPFRadioButton->setChecked(true);
+    // Enable the mask type switching radiobuttons 
     ui->LPFRadioButton->setEnabled(false);
     ui->HPFRadiobutton->setEnabled(false);
+
+    // Reset all the values on the control panel
+    if (resetVal)
+    {
+        ui->srcSpaRadioButton->setChecked(true);
+        ui->dstSpaRadioButton->setChecked(true);
+        ui->D0Val->setValue(1);
+        ui->gammaHVal->setValue(10);
+        ui->gammaLVal->setValue(0);
+        ui->BMaskOrderSpinBox->setValue(1);
+        ui->CSpinBox->setValue(1);
+        ui->LPFRadioButton->setChecked(true);
+    }
 
     // Reset all attrubures
     bufSrc.release();
@@ -829,3 +862,4 @@ void MainWindow::applyMask()
     // Extract the source image region
     bufDst = bufDst(Rect(0, 0, bufSrc.cols, bufSrc.rows));
 }
+

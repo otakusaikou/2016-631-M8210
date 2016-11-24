@@ -66,11 +66,17 @@ private slots:
 
     void on_actionHomomorphic_Filter_triggered();
 
-    void on_D0ValSlider_valueChanged(int value);
+    void on_D0ValSlider_sliderMoved(int position);
 
-    void on_gammaHSlider_valueChanged(int value);
+    void on_D0Val_valueChanged(int arg1);
 
-    void on_gammaLSlider_valueChanged(int value);
+    void on_gammaHSlider_sliderMoved(int position);
+
+    void on_gammaHVal_valueChanged(double arg1);
+
+    void on_gammaLSlider_sliderMoved(int position);
+
+    void on_gammaLVal_valueChanged(double arg1);
 
     void on_BMaskOrderSpinBox_valueChanged(int arg1);
 
@@ -83,7 +89,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    void init();
+    void init(const bool &resetVal);
 
     void updateFigures(const cv::Mat &src, QLabel *label);
 
