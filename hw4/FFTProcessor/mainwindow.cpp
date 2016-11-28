@@ -716,7 +716,7 @@ void MainWindow::init(const bool &resetVal)
     ui->srcSpaRadioButton->setEnabled(true);
     ui->srcFreqRadioButton->setEnabled(true);
 
-    // Disable the radiobutton in output image group box 
+    // Disable the radiobutton in output image group box
     ui->dstSpaRadioButton->setEnabled(false);
     ui->dstFreqRadioButton->setEnabled(false);
 
@@ -726,20 +726,20 @@ void MainWindow::init(const bool &resetVal)
     ui->D0Val->setEnabled(false);
 
     ui->gammaHLabel->setEnabled(false);             // Parameter 'gammaH' in Homomorphic filter
-    ui->gammaHSlider->setEnabled(false); 
+    ui->gammaHSlider->setEnabled(false);
     ui->gammaHVal->setEnabled(false);
 
     ui->gammaLLabel->setEnabled(false);             // Parameter 'gammaL' in Homomorphic filter
     ui->gammaLSlider->setEnabled(false);
     ui->gammaLVal->setEnabled(false);
 
-    ui->BMaskOrderLabel->setEnabled(false);         // Parameter 'n' in Butterworth filter 
+    ui->BMaskOrderLabel->setEnabled(false);         // Parameter 'n' in Butterworth filter
     ui->BMaskOrderSpinBox->setEnabled(false);
 
     ui->CLabel->setEnabled(false);                  // Parameter 'c' in Homomorphic filter
     ui->CSpinBox->setEnabled(false);
 
-    // Enable the mask type switching radiobuttons 
+    // Enable the mask type switching radiobuttons
     ui->LPFRadioButton->setEnabled(false);
     ui->HPFRadiobutton->setEnabled(false);
 
