@@ -15,14 +15,17 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     utils.cpp \
-    fcsettingdialog.cpp
+    fcsettingdialog.cpp \
+    getkdialog.cpp
 
 HEADERS  += mainwindow.h \
     utils.h \
-    fcsettingdialog.h
+    fcsettingdialog.h \
+    getkdialog.h
 
 FORMS    += mainwindow.ui \
-    fcsettingdialog.ui
+    fcsettingdialog.ui \
+    getkdialog.ui
 
 # User defined settings
 CONFIG += c++11
