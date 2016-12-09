@@ -1054,7 +1054,7 @@ void MainWindow::updateFigures()
     QImage QImg;
     vector<int> hist(256*bufImg.channels(), 0);        // Histogram
 
-    // Conver opencv image matrix to QImage object
+    // Convert opencv image matrix to QImage object
     if (bufImg.channels() == 1)
     {                   // For grayscale image
         QImg = QImage((const uchar*) (bufImg.data),

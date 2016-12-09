@@ -487,7 +487,7 @@ void MainWindow::updateFigures() {
     QImage QImg;
     vector<int> hist(256 * (*curImg).channels(), 0);        // Histogram
 
-    // Conver opencv image matrix to QImage object
+    // Convert opencv image matrix to QImage object
     if ((*curImg).channels() == 1) {        // For grayscale image
         QImg = QImage((const unsigned char*) ((*curImg).data),
                             (*curImg).cols, (*curImg).rows, (*curImg).step1(), QImage::Format_Grayscale8);

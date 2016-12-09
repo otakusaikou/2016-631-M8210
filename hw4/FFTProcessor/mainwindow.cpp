@@ -788,7 +788,7 @@ void MainWindow::updateFigures(const Mat &src, QLabel *label)
 
     QImage QImg;
 
-    // Conver opencv image matrix to QImage object
+    // Convert opencv image matrix to QImage object
     QImg = QImage((const uchar*) (bufShow.data),
                         bufShow.cols, bufShow.rows, bufShow.step1(), QImage::Format_Grayscale8);
 
