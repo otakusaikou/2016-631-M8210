@@ -1,10 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QStandardItemModel>
 
 using namespace std;
 using namespace cv;
-bool DEBUG = true;
+bool DEBUG = false;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -339,4 +338,54 @@ void MainWindow::updateFigures(const Mat &src, QLabel *label)
 
     // Update the pixelmap
     label->setPixmap(QPixmap::fromImage(imgResize));
+}
+
+//
+// K-means clustering
+// Reference: https://goo.gl/t9EXUd
+//
+void MainWindow::on_actionK_means_triggered()
+{
+    imgSrc.copyTo(bufSrc);
+
+    getKDialog *getkdialog = new getKDialog(this);
+    if (getkdialog->exec() == QDialog::Rejected) return;
+    int K = getkdialog->K;
+
+    Mat p = Mat::zeros(bufSrc.cols*bufSrc.rows, 5, CV_32F);
+    Mat bestLabels, centers, clustered;
+    vector<Mat> bgr;
+    split(bufSrc, bgr);
+    // i think there is a better way to split pixel bgr color
+    for(int i=0; i<bufSrc.cols*bufSrc.rows; i++) {
+        p.at<float>(i,0) = (i/bufSrc.cols) / bufSrc.rows;
+        p.at<float>(i,1) = (i%bufSrc.cols) / bufSrc.cols;
+        p.at<float>(i,2) = bgr[0].data[i] / 255.0;
+        p.at<float>(i,3) = bgr[1].data[i] / 255.0;
+        p.at<float>(i,4) = bgr[2].data[i] / 255.0;
+    }
+
+    kmeans(p, K, bestLabels,
+            TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 10, 1.0),
+            3, KMEANS_PP_CENTERS, centers);
+
+    int colors[K];
+    for(int i=0; i<K; i++) {
+        colors[i] = 255/(i+1);
+    }
+    // i think there is a better way to do this mayebe some Mat::reshape?
+    clustered = Mat(bufSrc.rows, bufSrc.cols, CV_32F);
+    for(int i=0; i<bufSrc.cols*bufSrc.rows; i++) {
+        clustered.at<float>(i/bufSrc.cols, i%bufSrc.cols) = (float)(colors[bestLabels.at<int>(0,i)]);
+//      cout << bestLabels.at<int>(0,i) << " " <<
+//              colors[bestLabels.at<int>(0,i)] << " " <<
+//              clustered.at<float>(i/src.cols, i%src.cols) << " " <<
+//              endl;
+    }
+
+    clustered.convertTo(clustered, CV_8U);
+    imshow("1", clustered);
+    imwrite("out.bmp", clustered);
+
+    updateFigures(clustered, ui->dstImgLabel);
 }

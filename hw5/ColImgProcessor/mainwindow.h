@@ -5,10 +5,12 @@
 #include <QFileDialog>
 #include <QString>
 #include <QMessageBox>
+#include <QStandardItemModel>
 #include <QDebug>
 #include <vector>
 #include <opencv2/opencv.hpp>
 #include "fcsettingdialog.h"
+#include "getkdialog.h"
 #include "utils.h"
 
 namespace Ui {
@@ -52,6 +54,8 @@ private slots:
     void on_YUVRadioButtion_clicked();
 
     void on_actionFalse_Color_triggered();
+
+    void on_actionK_means_triggered();
 
 private:
     Ui::MainWindow *ui;

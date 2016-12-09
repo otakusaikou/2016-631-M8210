@@ -139,6 +139,7 @@
      <string>Edit</string>
     </property>
     <addaction name="actionFalse_Color"/>
+    <addaction name="actionK_means"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -203,6 +204,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionK_means">
+   <property name="text">
+    <string>K-means</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+K</string>
    </property>
   </action>
  </widget>
