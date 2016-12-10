@@ -16,16 +16,16 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     utils.cpp \
     fcsettingdialog.cpp \
-    getkdialog.cpp
+    kmeansdialog.cpp
 
 HEADERS  += mainwindow.h \
     utils.h \
     fcsettingdialog.h \
-    getkdialog.h
+    kmeansdialog.h
 
 FORMS    += mainwindow.ui \
     fcsettingdialog.ui \
-    getkdialog.ui
+    kmeansdialog.ui
 
 # User defined settings
 CONFIG += c++11
@@ -53,3 +53,6 @@ unix{
     INCLUDEPATH += /usr/local/include/opencv
     LIBS += `pkg-config opencv --libs`
 }
+
+RESOURCES += \
+    myres.qrc
