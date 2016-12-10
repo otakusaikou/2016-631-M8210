@@ -333,7 +333,7 @@
    </property>
    <property name="font">
     <font>
-     <family>Abyssinica SIL</family>
+     <family>Sans Serif</family>
      <pointsize>12</pointsize>
     </font>
    </property>
@@ -402,6 +402,10 @@
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="myres.qrc">
+     <normaloff>:/Icon/icons/false-color-icon.png</normaloff>:/Icon/icons/false-color-icon.png</iconset>
+   </property>
    <property name="text">
     <string>False Color</string>
    </property>
@@ -417,6 +421,10 @@
   <action name="actionK_means">
    <property name="enabled">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="myres.qrc">
+     <normaloff>:/Icon/icons/color-clustering-icon.png</normaloff>:/Icon/icons/color-clustering-icon.png</iconset>
    </property>
    <property name="text">
     <string>K-means</string>
