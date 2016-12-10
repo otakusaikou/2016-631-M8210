@@ -1,5 +1,4 @@
 #include "utils.h"
-#include <QDebug>
 
 #define PI 3.14159265
 
@@ -192,4 +191,68 @@ void utils::convertMat(const Mat &src, Mat &dst, const CvtMode &mode)
             }
             break;
     }
+}
+
+//
+// Create false color image with given color map
+//
+void utils::getFCImg(const Mat &src, Mat &dst, const Mat &cmap)
+{
+    int colorNum = cmap.rows;
+    float interval = 256 / (colorNum - 1);
+    for (int i = 0; i < src.rows; ++i)
+    {
+        for (int j = 0; j < src.cols; ++j)
+        {
+            // Color value interpolation
+            float x = src.at<float>(i, j) / interval;
+            int x0 = static_cast<int>(x);
+            int x1 = x0 + 1;
+
+            if (x == (colorNum - 1))
+            {
+                dst.at<Vec3f>(i, j) =
+                        cmap.at<Vec3f>(colorNum - 1, 0);
+            } else if (x == 0)
+            {
+                dst.at<Vec3f>(i, j) =
+                        cmap.at<Vec3f>(x0, 0);
+
+            } else
+            {
+                dst.at<Vec3f>(i, j) =
+                        (x1-x)*cmap.at<Vec3f>(x0, 0) + (x-x0)*cmap.at<Vec3f>(x1, 0);
+            }
+        }
+    }
+}
+
+//
+// Image segmentation with K-means clustering
+//
+void utils::imgClustering(const Mat &src, Mat &dst, int &nclusters, bool &hasBlur, int &kSize)
+{
+    // If blur flag is true then blur the source image
+    if (hasBlur)
+        GaussianBlur(src, dst, Size(kSize, kSize), 0, 0);
+    else
+        src.copyTo(dst);
+
+    // Create an reshaped image
+    Mat sample = dst.reshape(dst.channels(), dst.rows*src.cols);
+
+    Mat labels;         // The output label for every sample data. A (M*N, 1) matrix
+    Mat centers;        // Center for each group. A (K, 1) matrix
+
+    // Data clustering with K-means algorithm
+    // CV_TERMCRIT_EPS + CV_TERMCRIT_ITER means stop the iteration when
+    // specified accuracy or iteration count is reached
+    // More information about kmeans function can be found at: https://goo.gl/PnizSj
+    kmeans(sample, nclusters, labels,
+           TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 10, 1.0),
+           3, KMEANS_PP_CENTERS, centers);
+
+    // Generate result image
+    dst = labels.reshape(1, dst.rows)*(255 / nclusters);
+    dst.convertTo(dst, CV_32F);
 }

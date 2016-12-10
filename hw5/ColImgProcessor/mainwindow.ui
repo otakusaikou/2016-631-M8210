@@ -6,16 +6,102 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>644</width>
-    <height>441</height>
+    <width>856</width>
+    <height>520</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QGridLayout" name="gridLayout_2">
-    <item row="4" column="0" colspan="2">
+   <layout class="QGridLayout" name="gridLayout_3">
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="srcImgLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QPushButton" name="toLeftPushButtion">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>40</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>←</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="dstImgLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="colorbarLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>15</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="0">
      <widget class="QGroupBox" name="rdoBtnGroupBox">
       <property name="enabled">
        <bool>false</bool>
@@ -26,12 +112,110 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
       <property name="title">
        <string>Color Space</string>
       </property>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0">
+       <item row="0" column="0" rowspan="2">
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="3">
+        <widget class="QRadioButton" name="YUVRadioButtion">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="layoutDirection">
+          <enum>Qt::LeftToRight</enum>
+         </property>
+         <property name="text">
+          <string>YUV</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QRadioButton" name="LabRadioButtion">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="layoutDirection">
+          <enum>Qt::LeftToRight</enum>
+         </property>
+         <property name="text">
+          <string>CIELAB</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QRadioButton" name="XYZRadioButtion">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>XYZ</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QRadioButton" name="HSIRadioButtion">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="layoutDirection">
+          <enum>Qt::LeftToRight</enum>
+         </property>
+         <property name="text">
+          <string>HSI</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QRadioButton" name="CMYRadioButtion">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="layoutDirection">
+          <enum>Qt::LeftToRight</enum>
+         </property>
+         <property name="text">
+          <string>CMY</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
         <widget class="QRadioButton" name="RGBRadioButton">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>RGB</string>
          </property>
@@ -40,78 +224,23 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QRadioButton" name="CMYRadioButtion">
-         <property name="text">
-          <string>CMY</string>
+       <item row="0" column="4" rowspan="2">
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QRadioButton" name="HSIRadioButtion">
-         <property name="text">
-          <string>HSI</string>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
          </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QRadioButton" name="XYZRadioButtion">
-         <property name="text">
-          <string>XYZ</string>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
          </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QRadioButton" name="LabRadioButtion">
-         <property name="text">
-          <string>CIELAB</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QRadioButton" name="YUVRadioButtion">
-         <property name="text">
-          <string>YUV</string>
-         </property>
-        </widget>
+        </spacer>
        </item>
       </layout>
-     </widget>
-    </item>
-    <item row="0" column="0" rowspan="2">
-     <widget class="QLabel" name="srcImgLabel">
-      <property name="text">
-       <string/>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1" rowspan="2">
-     <widget class="QLabel" name="dstImgLabel">
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="1">
-     <widget class="QLabel" name="colorbarLabel">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>10</height>
-       </size>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
      </widget>
     </item>
    </layout>
@@ -121,11 +250,21 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>644</width>
-     <height>18</height>
+     <width>856</width>
+     <height>22</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
    <widget class="QMenu" name="menuFile">
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
     <property name="title">
      <string>File</string>
     </property>
@@ -135,6 +274,11 @@
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
     <property name="title">
      <string>Edit</string>
     </property>
@@ -148,6 +292,17 @@
    <property name="enabled">
     <bool>true</bool>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>32</width>
+     <height>32</height>
+    </size>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
@@ -158,11 +313,29 @@
    <addaction name="actionSave"/>
    <addaction name="actionReset"/>
    <addaction name="actionExit"/>
+   <addaction name="actionFalse_Color"/>
+   <addaction name="actionK_means"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="statusBar">
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+  </widget>
   <action name="actionOpen">
+   <property name="icon">
+    <iconset resource="myres.qrc">
+     <normaloff>:/Icon/icons/document-open.svg</normaloff>:/Icon/icons/document-open.svg</iconset>
+   </property>
    <property name="text">
     <string>Open</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Abyssinica SIL</family>
+     <pointsize>12</pointsize>
+    </font>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -172,16 +345,34 @@
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="myres.qrc">
+     <normaloff>:/Icon/icons/document-save.svg</normaloff>:/Icon/icons/document-save.svg</iconset>
+   </property>
    <property name="text">
     <string>Save</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
    </property>
   </action>
   <action name="actionExit">
+   <property name="icon">
+    <iconset resource="myres.qrc">
+     <normaloff>:/Icon/icons/application-exit.svg</normaloff>:/Icon/icons/application-exit.svg</iconset>
+   </property>
    <property name="text">
     <string>Exit</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
@@ -191,24 +382,49 @@
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="myres.qrc">
+     <normaloff>:/Icon/icons/document-revert.svg</normaloff>:/Icon/icons/document-revert.svg</iconset>
+   </property>
    <property name="text">
     <string>Reset</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
    </property>
   </action>
   <action name="actionFalse_Color">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>False Color</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
    </property>
   </action>
   <action name="actionK_means">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>K-means</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
    </property>
    <property name="shortcut">
     <string>Ctrl+K</string>
@@ -216,6 +432,8 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="myres.qrc"/>
+ </resources>
  <connections/>
 </ui>

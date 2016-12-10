@@ -10,7 +10,7 @@
 #include <vector>
 #include <opencv2/opencv.hpp>
 #include "fcsettingdialog.h"
-#include "getkdialog.h"
+#include "kmeansdialog.h"
 #include "utils.h"
 
 namespace Ui {
@@ -57,10 +57,13 @@ private slots:
 
     void on_actionK_means_triggered();
 
+    void on_toLeftPushButtion_clicked();
+
 private:
     Ui::MainWindow *ui;
 
     void init();
+
     void updateFigures(const cv::Mat &src, QLabel *label);
 };
 

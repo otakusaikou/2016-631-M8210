@@ -6,7 +6,7 @@ FCSettingDialog::FCSettingDialog(QWidget *parent) :
     ui(new Ui::FCSettingDialog)
 {
     ui->setupUi(this);
-    this->setWindowTitle("False Color Settings");      // Set dialog title
+    this->setWindowTitle("Set color combination");      // Set dialog title
 
     // Initialize the tableView object
     int rows = 3;
