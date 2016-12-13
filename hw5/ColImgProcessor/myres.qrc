@@ -4,5 +4,7 @@
         <file>icons/document-open.svg</file>
         <file>icons/document-revert.svg</file>
         <file>icons/document-save.svg</file>
+        <file>icons/false-color-icon.png</file>
+        <file>icons/color-clustering-icon.png</file>
     </qresource>
 </RCC>
