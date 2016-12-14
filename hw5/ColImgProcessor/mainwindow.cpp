@@ -226,6 +226,7 @@ void MainWindow::on_actionFalse_Color_triggered()
         QColor color = index.data(Qt::BackgroundRole).value<QBrush>().color();
         cmap.at<Vec3f>(i, 0) = Vec3f(color.red(),color.green(), color.blue());
     }
+    delete fcSettingDialog;
 
     // Create colorbar
     Mat colorbarSrc = Mat::zeros(10, 256, CV_32F);
@@ -264,6 +265,7 @@ void MainWindow::on_actionK_means_triggered()
     int K = kMeansDialog->K;
     int kSize = kMeansDialog->kSize;
     bool hasBlur = kMeansDialog->hasBlur;
+    delete kMeansDialog;
 
     // Check the mask size
     if (hasBlur && kSize % 2 == 0 )
