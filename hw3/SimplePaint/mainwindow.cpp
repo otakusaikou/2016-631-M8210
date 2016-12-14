@@ -317,6 +317,7 @@ void MainWindow::on_actionThreshold_triggered()
     if (thresDialog->exec() == QDialog::Rejected) return;
     int thres = thresDialog->thres;
     int maxVal = thresDialog->maxVal;
+    delete thresDialog;
 
     for (int i = 0; i < bufImg.rows; ++i)
     {
@@ -561,6 +562,7 @@ void MainWindow::on_actionAveraging_Filter_triggered()
     int maskRows = maskSizeDialog->rows;
     int maskCols = maskSizeDialog->cols;
     bool timing = maskSizeDialog->timing;
+    delete maskSizeDialog;
 
     // Check the mask size
     if (maskRows % 2 == 0 || maskCols % 2 == 0)
@@ -576,7 +578,7 @@ void MainWindow::on_actionAveraging_Filter_triggered()
     if (maskDialog->exec() == QDialog::Rejected) return;
 
     // Measure the computation time
-    clock_t begin_time;
+    clock_t begin_time = 0;
     if (timing) begin_time = clock();   // Timing start
 
     // Create mask array
@@ -590,11 +592,13 @@ void MainWindow::on_actionAveraging_Filter_triggered()
             mask[maskCols*i + j] = m*(model->index(i, j).data().toInt());
         }
     }
+    delete maskDialog;
 
     // Create a template image buffer
     Mat tmpImg = Mat::zeros(bufImg.rows, bufImg.cols, bufImg.type());
 
     convolve(bufImg, tmpImg, mask, maskRows, maskCols, CV_8U);
+    delete[] mask;
 
     if (timing)                         // Timing end
     {
@@ -623,6 +627,7 @@ void MainWindow::on_actionGaussian_Filter_triggered()
     double sigma = gMaskDialog->sigma;
     double *gFilter = new double[size*size];
     bool timing = gMaskDialog->timing;
+    delete gMaskDialog;
 
     // Check the filter size
     if (size % 2 == 0)
@@ -643,6 +648,7 @@ void MainWindow::on_actionGaussian_Filter_triggered()
     Mat tmpImg = Mat::zeros(bufImg.rows, bufImg.cols, bufImg.type());
 
     convolve(bufImg, tmpImg, gFilter, size, size, CV_8U);
+    delete[] gFilter;
 
     if (timing)                         // Timing end
     {
@@ -670,6 +676,7 @@ void MainWindow::on_actionMedian_Filter_triggered()
     int maskRows = maskSizeDialog->rows;
     int maskCols = maskSizeDialog->cols;
     bool timing = maskSizeDialog->timing;
+    delete maskSizeDialog;
 
     // Check the mask size
     if (maskRows % 2 == 0 || maskCols % 2 == 0)
@@ -715,6 +722,7 @@ void MainWindow::on_actionMaxminum_Filter_triggered()
     int maskRows = maskSizeDialog->rows;
     int maskCols = maskSizeDialog->cols;
     bool timing = maskSizeDialog->timing;
+    delete maskSizeDialog;
 
     // Check the mask size
     if (maskRows % 2 == 0 || maskCols % 2 == 0)
@@ -760,6 +768,7 @@ void MainWindow::on_actionMinimum_Filter_triggered()
     int maskRows = maskSizeDialog->rows;
     int maskCols = maskSizeDialog->cols;
     bool timing = maskSizeDialog->timing;
+    delete maskSizeDialog;
 
     // Check the mask size
     if (maskRows % 2 == 0 || maskCols % 2 == 0)
@@ -814,11 +823,13 @@ void MainWindow::on_actionLaplacian_filter_triggered()
             mask[3*i + j] = m*(model->index(i, j).data().toInt());
         }
     }
+    delete maskDialog;
 
     // Create a template image buffer
     Mat tmpImg = Mat::zeros(bufImg.rows, bufImg.cols, bufImg.type());
 
     convolve(bufImg, tmpImg, mask, 3, 3, CV_8U);
+    delete[] mask;
 
     // Copy the content of template image to current image buffer
     tmpImg.copyTo(bufImg);
@@ -840,6 +851,7 @@ void MainWindow::on_actionUnsharp_Masking_triggered()
     double *gFilter = new double[size*size];
     bool timing = uMaskDialog->timing;
     double K = uMaskDialog->k;
+    delete uMaskDialog;
 
     // Check the mask size
     if (size % 2 == 0)
@@ -851,7 +863,7 @@ void MainWindow::on_actionUnsharp_Masking_triggered()
     }
 
     // Measure the computation time
-    clock_t begin_time;
+    clock_t begin_time = 0;
     if (timing) begin_time = clock();   // Timing start
 
     // Blur the original image
@@ -861,6 +873,7 @@ void MainWindow::on_actionUnsharp_Masking_triggered()
     Mat tmpImg = Mat::zeros(bufImg.rows, bufImg.cols, bufImg.type());
 
     convolve(bufImg, tmpImg, gFilter, size, size, CV_8U);
+    delete[] gFilter;
 
     // New image = original image + K * (original image - blurred image)
     for(int i = 0; i < bufImg.rows; ++i)
@@ -938,6 +951,7 @@ void MainWindow::on_actionMarr_Hildreth_Edge_Detector_triggered()
     Mat tmpImg = Mat::zeros(bufImg.rows, bufImg.cols, bufImg.type());
 
     convolve(bufImg, tmpImg, gFilter, size, size, CV_8U);
+    delete[] gFilter;
     tmpImg.copyTo(bufImg);
 
     // Compute the Laplacian of the Gaussian blurred image (LoG)
@@ -951,8 +965,10 @@ void MainWindow::on_actionMarr_Hildreth_Edge_Detector_triggered()
             mask[3*i + j] = (model->index(i, j).data().toInt());
         }
     }
+    delete mHEdgeDialog;
 
     convolve(bufImg, tmpImg, mask, 3, 3, CV_16S);
+    delete[] mask;
     tmpImg.copyTo(bufImg);
 
     // Find the zero crossing points in the image
@@ -987,6 +1003,7 @@ void MainWindow::on_actionSobel_Edge_Detector_triggered()
     SMaskDialog *sMaskDialog = new SMaskDialog(this);
     if (sMaskDialog->exec() == QDialog::Rejected) return;
     double thres = sMaskDialog->thres;
+    delete sMaskDialog;
 
     // If current image is color image, convert it to grayscale image
     if (bufImg.channels() == 3) cvtColor(bufImg, bufImg, COLOR_RGB2GRAY);
@@ -1015,6 +1032,7 @@ void MainWindow::on_actionFuzzy_Sets_Spatial_Filtering_triggered()
     double sigma = fuzzySetsDialog->sigma;
     int lowerBound = fuzzySetsDialog->lowerBound;
     int upperBound = fuzzySetsDialog->upperBound;
+    delete fuzzySetsDialog;
 
     // If current image is color image, convert it to grayscale image
     if (bufImg.channels() == 3) cvtColor(bufImg, bufImg, COLOR_RGB2GRAY);
