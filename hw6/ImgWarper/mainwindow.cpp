@@ -70,16 +70,17 @@ void MainWindow::on_actionOpen_triggered()
     // For control panels at right side
     ui->trapeGroupBox->setEnabled(true);
     ui->lengthHorizontalSlider->setMaximum(length);
-    ui->lengthSpinBox->setMaximum(length); 
+    ui->lengthSpinBox->setMaximum(length);
     ui->shiftHorizontalSlider->setMaximum(length);
     ui->shiftSpinBox->setMaximum(length);
 
     ui->wavyGroupBox->setEnabled(true);
     ui->circleGroupBox->setEnabled(true);
 
-    // Copy the source image to image buffer
+    // Copy the source image to image buffers
     cvtColor(imgSrc, imgSrc, COLOR_BGR2RGB);
     imgSrc.convertTo(bufSrc, CV_32F);
+    bufSrc.copyTo(bufDst);
     updateFigures(bufSrc, ui->srcImgLabel);         // Update the image label
 
     // Set the initial values for parameters on the right panel
@@ -115,12 +116,12 @@ void MainWindow::on_actionSave_triggered()
         // Save source image
         if (bufSrc.channels() > 1)
         {
-            cvtColor(bufSrc, bufSave, COLOR_RGB2BGR);
+            cvtColor(bufDst, bufSave, COLOR_RGB2BGR);
             bufSave.convertTo(bufSave, CV_8U);
         }
         else
         {
-            bufSrc.convertTo(bufSave, CV_8U);
+            bufDst.convertTo(bufSave, CV_8U);
         }
 
         imwrite((f + e).toStdString(), bufSave);
@@ -167,10 +168,10 @@ void MainWindow::on_lengthSpinBox_valueChanged(int arg1)
     processor.getParam(height, width, length, shift, param);
 
     // Create new image
-    Mat bufTmp = Mat::zeros(bufSrc.size(), CV_32FC3);
-    processor.resampleTrap(bufSrc, bufTmp, param);
+    bufDst = Mat::zeros(bufSrc.size(), CV_32FC3);
+    processor.resampleTrap(bufSrc, bufDst, param);
 
-    updateFigures(bufTmp, ui->srcImgLabel);
+    updateFigures(bufDst, ui->srcImgLabel);
 }
 
 //
@@ -198,10 +199,10 @@ void MainWindow::on_shiftSpinBox_valueChanged(int arg1)
     processor.getParam(height, width, length, shift, param);
 
     // Create new image
-    Mat bufTmp = Mat::zeros(bufSrc.size(), CV_32FC3);
-    processor.resampleTrap(bufSrc, bufTmp, param);
+    bufDst = Mat::zeros(bufSrc.size(), CV_32FC3);
+    processor.resampleTrap(bufSrc, bufDst, param);
 
-    updateFigures(bufTmp, ui->srcImgLabel);
+    updateFigures(bufDst, ui->srcImgLabel);
 }
 
 //
@@ -222,10 +223,10 @@ void MainWindow::on_amplSpinBox_valueChanged(int arg1)
     ampl = static_cast<float>(arg1);
 
     // Create new image
-    Mat bufTmp = Mat::zeros(bufSrc.size(), CV_32FC3);
-    processor.resampleWavy(bufSrc, bufTmp, ampl, freq);
+    bufDst = Mat::zeros(bufSrc.size(), CV_32FC3);
+    processor.resampleWavy(bufSrc, bufDst, ampl, freq);
 
-    updateFigures(bufTmp, ui->srcImgLabel);
+    updateFigures(bufDst, ui->srcImgLabel);
 }
 
 //
@@ -246,10 +247,10 @@ void MainWindow::on_freqSpinBox_valueChanged(int arg1)
     freq = 0.1 * static_cast<double>(arg1) / 100;
 
     // Create new image
-    Mat bufTmp = Mat::zeros(bufSrc.size(), CV_32FC3);
-    processor.resampleWavy(bufSrc, bufTmp, ampl, freq);
+    bufDst = Mat::zeros(bufSrc.size(), CV_32FC3);
+    processor.resampleWavy(bufSrc, bufDst, ampl, freq);
 
-    updateFigures(bufTmp, ui->srcImgLabel);
+    updateFigures(bufDst, ui->srcImgLabel);
 }
 
 //
@@ -270,10 +271,10 @@ void MainWindow::on_zoomSpinBox_valueChanged(int arg1)
     zoom = 0.5 + (static_cast<double>(arg1)/100);
 
     // Create new image
-    Mat bufTmp = Mat::zeros(bufSrc.size(), CV_32FC3);
-    processor.resampleCircular(bufSrc, bufTmp, zoom, strength);
+    bufDst = Mat::zeros(bufSrc.size(), CV_32FC3);
+    processor.resampleCircular(bufSrc, bufDst, zoom, strength);
 
-    updateFigures(bufTmp, ui->srcImgLabel);
+    updateFigures(bufDst, ui->srcImgLabel);
 }
 
 //
@@ -294,10 +295,10 @@ void MainWindow::on_streSpinBox_valueChanged(int arg1)
     strength = 2 * (static_cast<double>(arg1)/100);
 
     // Create new image
-    Mat bufTmp = Mat::zeros(bufSrc.size(), CV_32FC3);
-    processor.resampleCircular(bufSrc, bufTmp, zoom, strength);
+    bufDst = Mat::zeros(bufSrc.size(), CV_32FC3);
+    processor.resampleCircular(bufSrc, bufDst, zoom, strength);
 
-    updateFigures(bufTmp, ui->srcImgLabel);
+    updateFigures(bufDst, ui->srcImgLabel);
 }
 
 //
@@ -335,6 +336,7 @@ void MainWindow::init()
 
     // Release memory of image buffer
     bufSrc.release();
+    bufDst.release();
 
     ui->srcImgLabel->clear();
 }

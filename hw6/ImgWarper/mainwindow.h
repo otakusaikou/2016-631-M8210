@@ -24,6 +24,7 @@ public:
     QString filename;
     cv::Mat imgSrc;         // Source image
     cv::Mat bufSrc;         // Image buffer for source image
+    cv::Mat bufDst;         // Image buffer for output image
     utils processor;        // Image transformation processor
     int msgBox;
 
