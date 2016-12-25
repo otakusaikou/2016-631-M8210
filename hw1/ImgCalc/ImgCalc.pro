@@ -42,7 +42,13 @@ win32{
 }
 
 # For linux
-unix{
+unix:!macx{
     INCLUDEPATH += /usr/local/include/opencv
     LIBS += `pkg-config opencv --libs`
+}
+
+# For macOS
+macx{
+    INCLUDEPATH += /usr/local/include
+    LIBS += `/usr/local/bin/pkg-config opencv --libs`
 }
