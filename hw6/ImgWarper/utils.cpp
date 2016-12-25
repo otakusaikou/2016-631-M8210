@@ -11,16 +11,57 @@ utils::utils()
 //
 // Compute 8 parameters for trapezoidal transformation
 //
-void utils::getParam(const float &width, const float &height, const float &length, const float &shift, Mat &param)
+void utils::getParam(const float &width, const float &height, const float &length, const float &shift, Mat &param, const pos &edgePos)
 {
     // Coordinates of four corner (v, w) from destination image
-    float v[4] = {0, 0,
-        static_cast<float>(width - shift),
-        static_cast<float>(width - shift)};
-    float w[4] = {0,
-        static_cast<float>(height),
-        static_cast<float>(0 + ceil((height-length)/2)),
-        static_cast<float>(height - floor((height-length)/2))};
+    float v[4];
+    float w[4];
+    switch(edgePos)
+    {
+        case TOP:
+            v[0] = static_cast<float>(0 + ceil((width-length)/2));
+            v[1] = 0;
+            v[2] = static_cast<float>(width - floor((width-length)/2));
+            v[3] = static_cast<float>(width);
+            w[0] = static_cast<float>(shift);
+            w[1] = static_cast<float>(height);
+            w[2] = static_cast<float>(shift);
+            w[3] = static_cast<float>(height);
+            break;
+
+        case BOTTOM:
+            v[0] = 0;
+            v[1] = static_cast<float>(0 + ceil((width-length)/2));
+            v[2] = static_cast<float>(width);
+            v[3] = static_cast<float>(width - floor((width-length)/2));
+            w[0] = 0;
+            w[1] = static_cast<float>(height - shift);
+            w[2] = 0;
+            w[3] = static_cast<float>(height - shift);
+            break;
+
+        case LEFT:
+            v[0] = static_cast<float>(shift);
+            v[1] = static_cast<float>(shift);
+            v[2] = static_cast<float>(width);
+            v[3] = static_cast<float>(width);
+            w[0] = static_cast<float>(0 + ceil((height-length)/2));
+            w[1] = static_cast<float>(height - floor((height-length)/2));
+            w[2] = 0;
+            w[3] = static_cast<float>(height);;
+            break;
+
+        case RIGHT:
+            v[0] = 0;
+            v[1] = 0;
+            v[2] = static_cast<float>(width - shift);
+            v[3] = static_cast<float>(width - shift);
+            w[0] = 0;
+            w[1] = static_cast<float>(height);
+            w[2] = static_cast<float>(0 + ceil((height-length)/2));
+            w[3] = static_cast<float>(height - floor((height-length)/2));
+            break;
+    }
 
     // Coordinates of four corner (x, y) from source image
     float x[4] = {0, 0,

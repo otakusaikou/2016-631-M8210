@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1118</width>
-    <height>505</height>
+    <height>509</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -50,6 +50,9 @@
              <pointsize>12</pointsize>
             </font>
            </property>
+           <property name="minimum">
+            <number>50</number>
+           </property>
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -69,7 +72,7 @@
             </font>
            </property>
            <property name="minimum">
-            <number>1</number>
+            <number>50</number>
            </property>
            <property name="maximum">
             <number>99</number>
@@ -135,6 +138,18 @@
           </widget>
          </item>
          <item>
+          <widget class="QRadioButton" name="BoRadioButton">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Bottom Edge</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QRadioButton" name="LeRadioButton">
            <property name="font">
             <font>
@@ -146,18 +161,6 @@
            </property>
            <property name="checked">
             <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="LoRadioButton">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Low Edge</string>
            </property>
           </widget>
          </item>

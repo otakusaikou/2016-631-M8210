@@ -28,7 +28,9 @@ public:
     utils processor;        // Image transformation processor
     int msgBox;
 
-    float length;           // Parameters for trapezoidal transformation
+    // Parameters for trapezoidal transformation
+    utils::pos edgePos;
+    float length;
     float shift;
 
     float ampl;             // Parameters for wavy transformation
@@ -45,6 +47,14 @@ private slots:
     void on_actionReset_triggered();
 
     void on_actionExit_triggered();
+
+    void on_ToRadioButton_clicked();
+
+    void on_BoRadioButton_clicked();
+
+    void on_LeRadioButton_clicked();
+
+    void on_RiRadioButton_clicked();
 
     void on_lengthSpinBox_valueChanged(int arg1);
 

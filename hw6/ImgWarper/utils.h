@@ -7,7 +7,9 @@ class utils
 public:
     utils();
 
-    void getParam(const float &height, const float &width, const float &length, const float &shift, cv::Mat &param);
+    enum pos {TOP, BOTTOM, LEFT, RIGHT};
+
+    void getParam(const float &height, const float &width, const float &length, const float &shift, cv::Mat &param, const pos &edgePos);
 
     void resampleTrap(cv::Mat const &src, cv::Mat &dst, const cv::Mat &param);
 

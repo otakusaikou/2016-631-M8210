@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-bool DEBUG = true;
+bool DEBUG = false;
 
 using namespace std;
 using namespace cv;
@@ -55,25 +55,15 @@ void MainWindow::on_actionOpen_triggered()
     }
 
     // Initialize parameters
-    length = imgSrc.cols;               /***** NEED TO FIX *****/
-    shift = 0;
-    ampl = 0;
-    freq = 0.001;
-    zoom = 0.5;
-    strength = 0;
+    init();
 
     /* For GUI */
     this->setWindowTitle("ImgWarper - " + filename);    // Reset mainwindow title
     ui->actionSave->setEnabled(true);                   // For toolbox
     ui->actionReset->setEnabled(true);
 
-    // For control panels at right side
+    // For control panel at right side
     ui->trapeGroupBox->setEnabled(true);
-    ui->lengthHorizontalSlider->setMaximum(length);
-    ui->lengthSpinBox->setMaximum(length);
-    ui->shiftHorizontalSlider->setMaximum(length);
-    ui->shiftSpinBox->setMaximum(length);
-
     ui->wavyGroupBox->setEnabled(true);
     ui->circleGroupBox->setEnabled(true);
 
@@ -82,9 +72,6 @@ void MainWindow::on_actionOpen_triggered()
     imgSrc.convertTo(bufSrc, CV_32F);
     bufSrc.copyTo(bufDst);
     updateFigures(bufSrc, ui->srcImgLabel);         // Update the image label
-
-    // Set the initial values for parameters on the right panel
-    ui->lengthSpinBox->setValue(length);
 }
 
 //
@@ -138,8 +125,9 @@ void MainWindow::on_actionReset_triggered()
 {
     init();
 
-    // Copy the source image to image buffer
+    // Copy the source image to image buffers
     imgSrc.convertTo(bufSrc, CV_32F);
+    bufSrc.copyTo(bufDst);
     updateFigures(bufSrc, ui->srcImgLabel);
 }
 
@@ -149,6 +137,118 @@ void MainWindow::on_actionReset_triggered()
 void MainWindow::on_actionExit_triggered()
 {
     close();
+}
+
+//
+// Switch the target to top edge
+//
+void MainWindow::on_ToRadioButton_clicked()
+{
+    // Change the flag
+    edgePos = processor.TOP;
+
+    // Reset the maximum value of spinbox and slider
+    float height = bufSrc.rows;
+    float width = bufSrc.cols;
+
+    ui->lengthHorizontalSlider->setMaximum(width - 50);
+    ui->lengthSpinBox->setMaximum(width - 50);
+    ui->shiftHorizontalSlider->setMaximum(height - 50);
+    ui->shiftSpinBox->setMaximum(height - 50);
+
+    // Get 8 parameters
+    Mat param;
+    processor.getParam(width, height, length, shift, param, edgePos);
+
+    // Create new image
+    bufDst = Mat::zeros(bufSrc.size(), CV_32FC3);
+    processor.resampleTrap(bufSrc, bufDst, param);
+
+    updateFigures(bufDst, ui->srcImgLabel);
+}
+
+//
+// Switch the target to bottom edge
+//
+void MainWindow::on_BoRadioButton_clicked()
+{
+    // Change the flag
+    edgePos = processor.BOTTOM;
+
+    // Reset the maximum value of spinbox and slider
+    float height = bufSrc.rows;
+    float width = bufSrc.cols;
+
+    ui->lengthHorizontalSlider->setMaximum(width - 50);
+    ui->lengthSpinBox->setMaximum(width - 50);
+    ui->shiftHorizontalSlider->setMaximum(height - 50);
+    ui->shiftSpinBox->setMaximum(height - 50);
+
+    // Get 8 parameters
+    Mat param;
+    processor.getParam(width, height, length, shift, param, edgePos);
+
+    // Create new image
+    bufDst = Mat::zeros(bufSrc.size(), CV_32FC3);
+    processor.resampleTrap(bufSrc, bufDst, param);
+
+    updateFigures(bufDst, ui->srcImgLabel);
+}
+
+//
+// Switch the target to left edge
+//
+void MainWindow::on_LeRadioButton_clicked()
+{
+    // Change the flag
+    edgePos = processor.LEFT;
+
+    // Reset the maximum value of spinbox and slider
+    float height = bufSrc.rows;
+    float width = bufSrc.cols;
+
+    ui->lengthHorizontalSlider->setMaximum(height - 50);
+    ui->lengthSpinBox->setMaximum(height - 50);
+    ui->shiftHorizontalSlider->setMaximum(width - 50);
+    ui->shiftSpinBox->setMaximum(width - 50);
+
+    // Get 8 parameters
+    Mat param;
+    processor.getParam(width, height, length, shift, param, edgePos);
+
+    // Create new image
+    bufDst = Mat::zeros(bufSrc.size(), CV_32FC3);
+    processor.resampleTrap(bufSrc, bufDst, param);
+
+    updateFigures(bufDst, ui->srcImgLabel);
+}
+
+//
+// Switch the target to right edge
+//
+void MainWindow::on_RiRadioButton_clicked()
+{
+    // Change the flag
+    edgePos = processor.RIGHT;
+
+    // Reset the maximum value of spinbox and slider
+    float height = bufSrc.rows;
+    float width = bufSrc.cols;
+
+    ui->lengthHorizontalSlider->setMaximum(height - 50);
+    ui->lengthSpinBox->setMaximum(height - 50);
+    ui->shiftHorizontalSlider->setMaximum(width - 50);
+    ui->shiftSpinBox->setMaximum(width - 50);
+
+    // Get 8 parameters
+    Mat param;
+    processor.getParam(width, height, length, shift, param, edgePos);
+
+    // Create new image
+    bufDst = Mat::zeros(bufSrc.size(), CV_32FC3);
+    processor.resampleTrap(bufSrc, bufDst, param);
+
+    updateFigures(bufDst, ui->srcImgLabel);
 }
 
 //
@@ -165,7 +265,7 @@ void MainWindow::on_lengthSpinBox_valueChanged(int arg1)
 
     // Get 8 parameters
     Mat param;
-    processor.getParam(height, width, length, shift, param);
+    processor.getParam(width, height, length, shift, param, edgePos);
 
     // Create new image
     bufDst = Mat::zeros(bufSrc.size(), CV_32FC3);
@@ -196,7 +296,7 @@ void MainWindow::on_shiftSpinBox_valueChanged(int arg1)
 
     // Get 8 parameters
     Mat param;
-    processor.getParam(height, width, length, shift, param);
+    processor.getParam(width, height, length, shift, param, edgePos);
 
     // Create new image
     bufDst = Mat::zeros(bufSrc.size(), CV_32FC3);
@@ -319,16 +419,23 @@ void MainWindow::init()
     ui->LeRadioButton->setChecked(true);
 
     // Reset all attribures
-    length = imgSrc.cols;               /***** NEED TO FIX *****/
+    edgePos = processor.LEFT;
+    length = imgSrc.cols - 50;
     shift = 0;
     ampl = 0;
     freq = 0.001;
     zoom = 0.5;
     strength = 0;
 
-    // For sliders
-    ui->lengthSpinBox->setValue(imgSrc.cols);             /***** NEED TO FIX *****/
+    // For panel at right side
+    ui->lengthHorizontalSlider->setMaximum(imgSrc.rows - 50);
+    ui->lengthSpinBox->setMaximum(imgSrc.rows - 50);
+    ui->lengthSpinBox->setValue(imgSrc.rows - 50);
+
+    ui->shiftHorizontalSlider->setMaximum(length);
+    ui->shiftSpinBox->setMaximum(length);
     ui->shiftSpinBox->setValue(0);
+
     ui->amplSpinBox->setValue(0);
     ui->freqSpinBox->setValue(0);
     ui->zoomSpinBox->setValue(0);
@@ -346,12 +453,16 @@ void MainWindow::init()
 //
 void MainWindow::updateFigures(const Mat &src, QLabel *label)
 {
+    if (src.empty())
+        return;
+
     Mat bufShow;        // Buffer for showing image
     src.convertTo(bufShow, CV_8U);
 
     QImage QImg;
 
     // Convert opencv image matrix to QImage object
+
     if (src.channels() == 1)
     {
         QImg = QImage((const uchar*) (bufShow.data),
