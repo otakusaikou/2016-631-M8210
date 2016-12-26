@@ -48,7 +48,7 @@ int main(int argc, char const* argv[])
     std::string extIn;
     splitFileName(txtName, fileIn, extIn);
 
-    // Inirialize new image
+    // Initialize new image
     int dim = std::stoi(extIn);
     cv::Mat img = cv::Mat::zeros(dim, dim, CV_8U);
 
