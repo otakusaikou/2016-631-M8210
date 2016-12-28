@@ -35,7 +35,7 @@ void usage(char * s)
     fprintf(stderr, "%s -s <source file> [-t <threshold>] - hough transform. build: %s-%s \n", s, __DATE__, __TIME__);
     fprintf(stderr, "   s: path image file\n");
     fprintf(stderr, "   t: hough threshold\n");
-    fprintf(stderr, "\nexample:  ./hough -s ../img/rects.bmp -t 40\n");
+    fprintf(stderr, "\nexample:  ./rectDetect -s ../img/rects.bmp -t 40\n");
     fprintf(stderr, "\n");
 }
 
