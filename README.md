@@ -16,3 +16,12 @@ This project require [OpenCV 3.1.0](https://github.com/Itseez/opencv) with [xfea
 
 ###Qt 5.7
 I use [Qt 5.7](https://www.qt.io/) with [Qt charts](http://doc.qt.io/qt-5/qtcharts-index.html) module for GUI developement  
+
+###Python
+This project require [Python v2.7.X](https://www.python.org) and the following modules to be installed.
+
+-[Numpy](http://www.numpy.org)  
+-[Pandas](http://pandas.pydata.org/)  
+-[Psycopg2-2.6.1 for python2.7](http://initd.org/psycopg)  
+-[Scipy](http://www.scipy.org)  
+-[Sympy](http://www.sympy.org/en/index.html)  
